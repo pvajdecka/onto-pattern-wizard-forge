@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+
+import React, { useRef, useEffect, useState } from 'react';
 
 interface Node {
   id: string;
@@ -31,6 +32,9 @@ interface NetworkGraph3DProps {
 export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [graphOffset, setGraphOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,7 +56,48 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    let rotation = 0;
+    // Mouse event handlers
+    const handleMouseDown = (e: MouseEvent) => {
+      setIsDragging(true);
+      const rect = canvas.getBoundingClientRect();
+      setLastMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const currentMousePos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      
+      const deltaX = currentMousePos.x - lastMousePos.x;
+      const deltaY = currentMousePos.y - lastMousePos.y;
+      
+      setGraphOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      
+      setLastMousePos(currentMousePos);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    const handleMouseLeave = () => {
+      setIsDragging(false);
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     // Function to calculate optimal node radius based on text
     const calculateNodeRadius = (text: string, baseRadius: number = 30) => {
@@ -60,16 +105,6 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const textWidth = ctx.measureText(text).width;
       const minRadius = Math.max(baseRadius, (textWidth / 2) + 15);
       return Math.min(minRadius, 60); // Cap at 60px
-    };
-
-    // Simplified position adjustment without complex collision detection
-    const adjustPositions = (nodes: any[]) => {
-      return nodes.map(node => ({
-        ...node,
-        screenX: node.screenX,
-        screenY: node.screenY,
-        radius: node.radius
-      }));
     };
 
     // Function to draw curved line for shortcut properties
@@ -127,39 +162,28 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+      const centerX = rect.width / 2 + graphOffset.x;
+      const centerY = rect.height / 2 + graphOffset.y;
       const scale = 80;
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Apply smooth rotation
-      const cos = Math.cos(rotation);
-      const sin = Math.sin(rotation);
-
       // Prepare nodes with screen positions and radii
       const nodesWithPositions = data.nodes.map(node => {
-        const x = node.x * cos - node.z * sin;
-        const y = node.y;
-        const z = node.x * sin + node.z * cos;
         const radius = calculateNodeRadius(node.label);
         
         return {
           ...node,
-          screenX: centerX + x * scale,
-          screenY: centerY + y * scale,
-          z: z,
-          radius: radius + z * 2 // Subtle perspective effect
+          screenX: centerX + node.x * scale,
+          screenY: centerY + node.y * scale,
+          radius: radius
         };
       });
 
-      // Use simplified position adjustment
-      const adjustedNodes = adjustPositions(nodesWithPositions);
-
       // Draw links
       data.links.forEach(link => {
-        const sourceNode = adjustedNodes.find(n => n.id === link.source);
-        const targetNode = adjustedNodes.find(n => n.id === link.target);
+        const sourceNode = nodesWithPositions.find(n => n.id === link.source);
+        const targetNode = nodesWithPositions.find(n => n.id === link.target);
         
         if (!sourceNode || !targetNode) return;
 
@@ -224,7 +248,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       });
 
       // Draw nodes
-      adjustedNodes.forEach(node => {
+      nodesWithPositions.forEach(node => {
         const screenX = node.screenX;
         const screenY = node.screenY;
         const radius = node.radius;
@@ -276,7 +300,6 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.shadowOffsetY = 0;
       });
 
-      rotation += 0.006; // Smooth rotation speed
       animationRef.current = requestAnimationFrame(draw);
     };
 
@@ -284,16 +307,20 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [data]);
+  }, [data, isDragging, graphOffset]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full rounded-lg"
+      className="w-full h-full rounded-lg cursor-grab active:cursor-grabbing"
       style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)' }}
     />
   );
