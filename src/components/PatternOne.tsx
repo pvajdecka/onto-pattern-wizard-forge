@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -85,60 +84,58 @@ Create a direct property that connects ${classA} to ${classC} via the property c
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Input Section */}
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Property p Label</Label>
-                  <Input
-                    value={propertyP}
-                    onChange={(e) => setPropertyP(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter property p label"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Property r Label</Label>
-                  <Input
-                    value={propertyR}
-                    onChange={(e) => setPropertyR(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter property r label"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
-                  <Input
-                    value={classA}
-                    onChange={(e) => setClassA(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter class A label"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Class B Label</Label>
-                  <Input
-                    value={classB}
-                    onChange={(e) => setClassB(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter class B label"
-                  />
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label className="text-sm font-medium text-gray-700">Class C Label</Label>
-                  <Input
-                    value={classC}
-                    onChange={(e) => setClassC(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter class C label"
-                  />
-                </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Property p Label</Label>
+                <Input
+                  value={propertyP}
+                  onChange={(e) => setPropertyP(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter property p label"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Property r Label</Label>
+                <Input
+                  value={propertyR}
+                  onChange={(e) => setPropertyR(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter property r label"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
+                <Input
+                  value={classA}
+                  onChange={(e) => setClassA(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter class A label"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Class B Label</Label>
+                <Input
+                  value={classB}
+                  onChange={(e) => setClassB(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter class B label"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Class C Label</Label>
+                <Input
+                  value={classC}
+                  onChange={(e) => setClassC(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter class C label"
+                />
               </div>
             </div>
 
             {/* 3D Visualization */}
-            <div className="space-y-4">
+            <div className="lg:col-span-2 space-y-4">
               <h3 className="text-lg font-semibold text-gray-800">Graph</h3>
               <div className="h-96 border-2 border-green-200 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50">
                 <NetworkGraph3D data={graphData} />
@@ -147,7 +144,7 @@ Create a direct property that connects ${classA} to ${classC} via the property c
           </div>
 
           {/* Few-Shot Section */}
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="fewshot"
