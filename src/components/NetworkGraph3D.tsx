@@ -30,6 +30,7 @@ interface NetworkGraph3DProps {
 
 export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,125 +52,98 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Function to split text into lines for circles
-    const splitTextIntoLines = (text: string, maxWidth: number) => {
-      const words = text.split(' ');
-      const lines = [];
-      let currentLine = '';
+    let rotation = 0;
 
-      ctx.font = 'bold 12px Inter, sans-serif';
-      
-      for (const word of words) {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const testWidth = ctx.measureText(testLine).width;
-        
-        if (testWidth <= maxWidth) {
-          currentLine = testLine;
-        } else {
-          if (currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            // Single word is too long, split it
-            lines.push(word);
-          }
-        }
-      }
-      
-      if (currentLine) {
-        lines.push(currentLine);
-      }
-      
-      return lines;
+    // Function to calculate optimal node radius based on text
+    const calculateNodeRadius = (text: string, baseRadius: number = 30) => {
+      ctx.font = 'bold 11px Inter, sans-serif';
+      const textWidth = ctx.measureText(text).width;
+      const minRadius = Math.max(baseRadius, (textWidth / 2) + 15);
+      return Math.min(minRadius, 60); // Cap at 60px
     };
 
-    // Function to calculate optimal node radius based on text lines
-    const calculateNodeRadius = (text: string) => {
-      const maxLineWidth = 100;
-      const lines = splitTextIntoLines(text, maxLineWidth);
-      const lineHeight = 16;
-      const padding = 20;
+    // Function to check if two circles intersect
+    const circlesIntersect = (x1: number, y1: number, r1: number, x2: number, y2: number, r2: number) => {
+      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+      return distance < (r1 + r2 + 20); // Add 20px buffer
+    };
+
+    // Function to adjust positions to prevent intersections
+    const adjustPositions = (nodes: any[]) => {
+      const adjustedNodes = [...nodes];
+      const maxIterations = 50;
       
-      // Calculate radius based on text dimensions
-      const textHeight = lines.length * lineHeight;
-      const maxTextWidth = Math.max(...lines.map(line => {
-        ctx.font = 'bold 12px Inter, sans-serif';
-        return ctx.measureText(line).width;
-      }));
+      for (let iteration = 0; iteration < maxIterations; iteration++) {
+        let hasIntersection = false;
+        
+        for (let i = 0; i < adjustedNodes.length; i++) {
+          for (let j = i + 1; j < adjustedNodes.length; j++) {
+            const node1 = adjustedNodes[i];
+            const node2 = adjustedNodes[j];
+            
+            if (circlesIntersect(node1.screenX, node1.screenY, node1.radius, node2.screenX, node2.screenY, node2.radius)) {
+              hasIntersection = true;
+              
+              // Calculate repulsion vector
+              const dx = node2.screenX - node1.screenX;
+              const dy = node2.screenY - node1.screenY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance > 0) {
+                const overlap = (node1.radius + node2.radius + 20) - distance;
+                const moveX = (dx / distance) * overlap * 0.5;
+                const moveY = (dy / distance) * overlap * 0.5;
+                
+                node1.screenX -= moveX;
+                node1.screenY -= moveY;
+                node2.screenX += moveX;
+                node2.screenY += moveY;
+              }
+            }
+          }
+        }
+        
+        if (!hasIntersection) break;
+      }
       
-      const radiusForWidth = (maxTextWidth / 2) + padding;
-      const radiusForHeight = (textHeight / 2) + padding;
-      
-      return Math.max(radiusForWidth, radiusForHeight, 45);
+      return adjustedNodes;
     };
 
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
-      
-      // Add margins to ensure complete graph fits
-      const margin = 120;
-      const usableWidth = rect.width - (margin * 2);
-      const usableHeight = rect.height - (margin * 2);
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
+      const scale = 80;
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Check if we have a shortcut link (generated result)
-      const hasShortcut = data.links.some(link => link.width && link.width > 2);
+      // Apply rotation
+      const cos = Math.cos(rotation);
+      const sin = Math.sin(rotation);
 
-      // Calculate maximum node radius to adjust spacing
-      const maxRadius = Math.max(...data.nodes.map(node => calculateNodeRadius(node.label)));
-      
-      // Dynamic spacing based on container size and max radius
-      const baseSpacing = Math.min(usableWidth, usableHeight) / 4;
-      const nodeSpacing = Math.max(baseSpacing, maxRadius * 3.5);
-
-      // Calculate node positions with safe bounds
-      const nodesWithPositions = data.nodes.map((node, index) => {
+      // Prepare nodes with screen positions and radii
+      const nodesWithPositions = data.nodes.map(node => {
+        const x = node.x * cos - node.z * sin;
+        const y = node.y;
+        const z = node.x * sin + node.z * cos;
         const radius = calculateNodeRadius(node.label);
-        let screenX, screenY;
-
-        if (hasShortcut) {
-          // Modified triangle layout for shortcut pattern
-          if (index === 0) { // Class A - positioned around Class B (top-left)
-            screenX = centerX - nodeSpacing * 0.6;
-            screenY = centerY - nodeSpacing * 0.5;
-          } else if (index === 1) { // Class B - center
-            screenX = centerX;
-            screenY = centerY;
-          } else if (index === 2) { // Class C - bottom
-            screenX = centerX;
-            screenY = centerY + nodeSpacing * 0.8;
-          } else { // New class - left
-            screenX = centerX - nodeSpacing * 1.2;
-            screenY = centerY;
-          }
-        } else {
-          // Horizontal layout for normal pattern
-          const totalNodes = data.nodes.length;
-          const startX = centerX - ((totalNodes - 1) * nodeSpacing) / 2;
-          screenX = startX + (index * nodeSpacing);
-          screenY = centerY + (node.y * nodeSpacing * 0.1);
-        }
-        
-        // Ensure nodes stay within bounds
-        screenX = Math.max(margin + radius, Math.min(rect.width - margin - radius, screenX));
-        screenY = Math.max(margin + radius, Math.min(rect.height - margin - radius, screenY));
         
         return {
           ...node,
-          screenX,
-          screenY,
-          z: node.z,
-          radius: radius
+          screenX: centerX + x * scale,
+          screenY: centerY + y * scale,
+          z: z,
+          radius: radius + z * 3 // Perspective effect
         };
       });
 
-      // Draw links with improved positioning to avoid intersections
+      // Adjust positions to prevent intersections
+      const adjustedNodes = adjustPositions(nodesWithPositions);
+
+      // Draw links
       data.links.forEach(link => {
-        const sourceNode = nodesWithPositions.find(n => n.id === link.source);
-        const targetNode = nodesWithPositions.find(n => n.id === link.target);
+        const sourceNode = adjustedNodes.find(n => n.id === link.source);
+        const targetNode = adjustedNodes.find(n => n.id === link.target);
         
         if (!sourceNode || !targetNode) return;
 
@@ -185,122 +159,56 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         const endEdgeX = endX - Math.cos(angle) * targetNode.radius;
         const endEdgeY = endY - Math.sin(angle) * targetNode.radius;
 
-        // Determine if this is a shortcut link
-        const isShortcut = link.width && link.width > 2;
-
         // Draw link
         ctx.beginPath();
-        if (isShortcut) {
-          // Draw curved shortcut link
-          const midX = (startEdgeX + endEdgeX) / 2;
-          const midY = (startEdgeY + endEdgeY) / 2;
-          const controlY = midY - 100; // Curve upward more
-          
-          ctx.moveTo(startEdgeX, startEdgeY);
-          ctx.quadraticCurveTo(midX, controlY, endEdgeX, endEdgeY);
-        } else {
-          ctx.moveTo(startEdgeX, startEdgeY);
-          ctx.lineTo(endEdgeX, endEdgeY);
-        }
-        
+        ctx.moveTo(startEdgeX, startEdgeY);
+        ctx.lineTo(endEdgeX, endEdgeY);
         ctx.strokeStyle = link.color;
         ctx.lineWidth = link.width || 2;
         
         if (link.style === 'dashed') {
-          ctx.setLineDash([8, 8]);
+          ctx.setLineDash([5, 5]);
         } else {
           ctx.setLineDash([]);
         }
         
         ctx.stroke();
 
-        // Calculate label position to avoid all intersections
-        let labelX, labelY;
+        // Draw label with background
+        const midX = (startEdgeX + endEdgeX) / 2;
+        const midY = (startEdgeY + endEdgeY) / 2;
         
-        if (isShortcut) {
-          // Position shortcut label above the curved line with more clearance
-          labelX = (startEdgeX + endEdgeX) / 2;
-          labelY = ((startEdgeY + endEdgeY) / 2) - 120;
-        } else {
-          // Position regular labels with smart offset calculation
-          const midX = (startEdgeX + endEdgeX) / 2;
-          const midY = (startEdgeY + endEdgeY) / 2;
-          
-          // Calculate perpendicular offset based on line direction
-          const perpAngle = angle + Math.PI / 2;
-          let offsetDistance = 60; // Increased distance to avoid circles
-          
-          // Check if we need to place label above or below the line
-          // For horizontal lines, place labels above by default
-          if (Math.abs(startY - endY) < 20) {
-            labelY = midY - offsetDistance;
-            labelX = midX;
-          } else {
-            // For angled lines, use perpendicular offset
-            labelX = midX + Math.cos(perpAngle) * offsetDistance;
-            labelY = midY + Math.sin(perpAngle) * offsetDistance;
-          }
-          
-          // Ensure label stays within bounds and doesn't intersect nodes
-          labelX = Math.max(margin + 60, Math.min(rect.width - margin - 60, labelX));
-          labelY = Math.max(margin + 30, Math.min(rect.height - margin - 30, labelY));
-          
-          // Additional check to avoid node intersections
-          for (const node of nodesWithPositions) {
-            const distToNode = Math.sqrt(Math.pow(labelX - node.screenX, 2) + Math.pow(labelY - node.screenY, 2));
-            if (distToNode < node.radius + 40) {
-              // Move label further away
-              const nodeAngle = Math.atan2(labelY - node.screenY, labelX - node.screenX);
-              labelX = node.screenX + Math.cos(nodeAngle) * (node.radius + 50);
-              labelY = node.screenY + Math.sin(nodeAngle) * (node.radius + 50);
-            }
-          }
-        }
-        
-        // Draw link label with enhanced background
-        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.font = '11px Inter, sans-serif';
         const textMetrics = ctx.measureText(link.label);
         const textWidth = textMetrics.width;
-        const textHeight = 16;
+        const textHeight = 14;
         
-        // Draw text background with padding
-        const bgPadding = 8;
-        ctx.fillStyle = isShortcut ? 'rgba(59, 130, 246, 0.95)' : 'rgba(255, 255, 255, 0.98)';
-        ctx.fillRect(
-          labelX - textWidth/2 - bgPadding, 
-          labelY - textHeight/2 - bgPadding/2, 
-          textWidth + bgPadding * 2, 
-          textHeight + bgPadding
-        );
+        // Draw text background
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
         
         // Draw text border
-        ctx.strokeStyle = isShortcut ? '#3b82f6' : '#d1d5db';
+        ctx.strokeStyle = '#e5e7eb';
         ctx.lineWidth = 1;
         ctx.setLineDash([]);
-        ctx.strokeRect(
-          labelX - textWidth/2 - bgPadding, 
-          labelY - textHeight/2 - bgPadding/2, 
-          textWidth + bgPadding * 2, 
-          textHeight + bgPadding
-        );
+        ctx.strokeRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
         
         // Draw text
-        ctx.fillStyle = isShortcut ? '#ffffff' : '#374151';
+        ctx.fillStyle = '#374151';
         ctx.textAlign = 'center';
-        ctx.fillText(link.label, labelX, labelY + 4);
+        ctx.fillText(link.label, midX, midY + 4);
       });
 
-      // Draw nodes with multi-line text
-      nodesWithPositions.forEach(node => {
+      // Draw nodes
+      adjustedNodes.forEach(node => {
         const screenX = node.screenX;
         const screenY = node.screenY;
         const radius = node.radius;
 
-        // Draw node circle with enhanced gradient
+        // Draw node circle with gradient
         const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, radius);
         gradient.addColorStop(0, node.color);
-        gradient.addColorStop(0.7, node.color);
-        gradient.addColorStop(1, node.color + 'CC');
+        gradient.addColorStop(1, node.color + 'CC'); // Add transparency at edges
         
         ctx.beginPath();
         ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
@@ -310,32 +218,32 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Add subtle inner shadow
+        // Add inner shadow
         ctx.beginPath();
-        ctx.arc(screenX, screenY, radius - 3, 0, 2 * Math.PI);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)';
+        ctx.arc(screenX, screenY, radius - 2, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Draw multi-line node label
+        // Draw node label with proper sizing
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.font = 'bold 11px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        ctx.shadowBlur = 3;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 2;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
-        const maxLineWidth = radius * 1.6;
-        const lines = splitTextIntoLines(node.label, maxLineWidth);
-        const lineHeight = 16;
-        const totalTextHeight = lines.length * lineHeight;
-        const startY = screenY - (totalTextHeight / 2) + (lineHeight / 2);
-        
-        lines.forEach((line, index) => {
-          const y = startY + (index * lineHeight);
-          ctx.fillText(line, screenX, y);
-        });
+        // Handle multi-line text for long labels
+        const words = node.label.split(' ');
+        if (words.length > 1 && ctx.measureText(node.label).width > radius * 1.6) {
+          const line1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
+          const line2 = words.slice(Math.ceil(words.length / 2)).join(' ');
+          ctx.fillText(line1, screenX, screenY - 3);
+          ctx.fillText(line2, screenX, screenY + 9);
+        } else {
+          ctx.fillText(node.label, screenX, screenY + 3);
+        }
         
         // Reset shadow
         ctx.shadowColor = 'transparent';
@@ -343,12 +251,18 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
       });
+
+      rotation += 0.008; // Slightly slower rotation
+      animationRef.current = requestAnimationFrame(draw);
     };
 
     draw();
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
   }, [data]);
 
