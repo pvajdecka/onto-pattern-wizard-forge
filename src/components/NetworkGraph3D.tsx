@@ -16,6 +16,7 @@ interface Link {
   color: string;
   style?: string;
   width?: number;
+  isShortcut?: boolean;
 }
 
 interface GraphData {
@@ -71,6 +72,59 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       }));
     };
 
+    // Function to draw curved line for shortcut properties
+    const drawCurvedLink = (startX: number, startY: number, endX: number, endY: number, color: string, width: number, label: string) => {
+      // Calculate control point for curve (arc outward)
+      const midX = (startX + endX) / 2;
+      const midY = (startY + endY) / 2;
+      
+      // Calculate perpendicular offset for curve
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const unitX = dx / length;
+      const unitY = dy / length;
+      
+      // Perpendicular vector (rotate 90 degrees)
+      const perpX = -unitY;
+      const perpY = unitX;
+      
+      // Control point offset (curve outward)
+      const curveOffset = 80;
+      const controlX = midX + perpX * curveOffset;
+      const controlY = midY + perpY * curveOffset;
+
+      // Draw curved path
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      // Draw label at the curve's peak
+      ctx.font = '11px Inter, sans-serif';
+      const textMetrics = ctx.measureText(label);
+      const textWidth = textMetrics.width;
+      const textHeight = 14;
+      
+      // Draw text background
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillRect(controlX - textWidth/2 - 4, controlY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+      
+      // Draw text border
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(controlX - textWidth/2 - 4, controlY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+      
+      // Draw text
+      ctx.fillStyle = '#1e40af';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.fillText(label, controlX, controlY + 4);
+    };
+
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
       const centerX = rect.width / 2;
@@ -121,44 +175,52 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         const endEdgeX = endX - Math.cos(angle) * targetNode.radius;
         const endEdgeY = endY - Math.sin(angle) * targetNode.radius;
 
-        // Draw link
-        ctx.beginPath();
-        ctx.moveTo(startEdgeX, startEdgeY);
-        ctx.lineTo(endEdgeX, endEdgeY);
-        ctx.strokeStyle = link.color;
-        ctx.lineWidth = link.width || 2;
-        
-        if (link.style === 'dashed') {
-          ctx.setLineDash([5, 5]);
-        } else {
-          ctx.setLineDash([]);
-        }
-        
-        ctx.stroke();
+        // Check if this is a shortcut property (typically A to C connection with blue color)
+        const isShortcut = link.color === '#3b82f6' || link.width === 3;
 
-        // Draw label with background
-        const midX = (startEdgeX + endEdgeX) / 2;
-        const midY = (startEdgeY + endEdgeY) / 2;
-        
-        ctx.font = '11px Inter, sans-serif';
-        const textMetrics = ctx.measureText(link.label);
-        const textWidth = textMetrics.width;
-        const textHeight = 14;
-        
-        // Draw text background
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
-        
-        // Draw text border
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([]);
-        ctx.strokeRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
-        
-        // Draw text
-        ctx.fillStyle = '#374151';
-        ctx.textAlign = 'center';
-        ctx.fillText(link.label, midX, midY + 4);
+        if (isShortcut) {
+          // Draw curved link for shortcut properties
+          drawCurvedLink(startEdgeX, startEdgeY, endEdgeX, endEdgeY, link.color, link.width || 3, link.label);
+        } else {
+          // Draw regular straight link
+          ctx.beginPath();
+          ctx.moveTo(startEdgeX, startEdgeY);
+          ctx.lineTo(endEdgeX, endEdgeY);
+          ctx.strokeStyle = link.color;
+          ctx.lineWidth = link.width || 2;
+          
+          if (link.style === 'dashed') {
+            ctx.setLineDash([5, 5]);
+          } else {
+            ctx.setLineDash([]);
+          }
+          
+          ctx.stroke();
+
+          // Draw label with background for regular links
+          const midX = (startEdgeX + endEdgeX) / 2;
+          const midY = (startEdgeY + endEdgeY) / 2;
+          
+          ctx.font = '11px Inter, sans-serif';
+          const textMetrics = ctx.measureText(link.label);
+          const textWidth = textMetrics.width;
+          const textHeight = 14;
+          
+          // Draw text background
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.fillRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+          
+          // Draw text border
+          ctx.strokeStyle = '#e5e7eb';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([]);
+          ctx.strokeRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+          
+          // Draw text
+          ctx.fillStyle = '#374151';
+          ctx.textAlign = 'center';
+          ctx.fillText(link.label, midX, midY + 4);
+        }
       });
 
       // Draw nodes
