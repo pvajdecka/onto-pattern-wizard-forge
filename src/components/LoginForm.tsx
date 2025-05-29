@@ -37,22 +37,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Logos at the very top */}
-      <div className="w-full pt-4 pb-2">
-        <div className="flex justify-center space-x-8 p-2">
-          <img 
-            src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
-            alt="ONTO-DESIDE Logo" 
-            className="h-20 object-contain opacity-80"
-          />
-          <img 
-            src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
-            alt="VSE Faculty Logo" 
-            className="h-20 object-contain opacity-80"
-          />
-        </div>
-      </div>
-
       {/* Main content area */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md space-y-4 relative z-10">
@@ -134,6 +118,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           <div className="text-center text-sm text-slate-500">
             Demo credentials: peter/VSE or vojtech/VSE
           </div>
+        </div>
+      </div>
+
+      {/* Logos at the bottom */}
+      <div className="w-full pb-4 pt-2">
+        <div className="flex justify-center space-x-8 p-2">
+          <img 
+            src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
+            alt="ONTO-DESIDE Logo" 
+            className="h-20 object-contain opacity-80"
+          />
+          <img 
+            src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
+            alt="VSE Faculty Logo" 
+            className="h-20 object-contain opacity-80"
+          />
         </div>
       </div>
     </div>
