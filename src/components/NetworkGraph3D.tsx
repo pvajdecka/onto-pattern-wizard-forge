@@ -107,7 +107,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const rect = canvas.getBoundingClientRect();
       
       // Add margins to ensure complete graph fits
-      const margin = 100;
+      const margin = 120;
       const usableWidth = rect.width - (margin * 2);
       const usableHeight = rect.height - (margin * 2);
       const centerX = rect.width / 2;
@@ -122,8 +122,8 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const maxRadius = Math.max(...data.nodes.map(node => calculateNodeRadius(node.label)));
       
       // Dynamic spacing based on container size and max radius
-      const baseSpacing = Math.min(usableWidth, usableHeight) / 3.5;
-      const nodeSpacing = Math.max(baseSpacing, maxRadius * 3);
+      const baseSpacing = Math.min(usableWidth, usableHeight) / 4;
+      const nodeSpacing = Math.max(baseSpacing, maxRadius * 3.5);
 
       // Calculate node positions with safe bounds
       const nodesWithPositions = data.nodes.map((node, index) => {
@@ -131,19 +131,19 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         let screenX, screenY;
 
         if (hasShortcut) {
-          // Triangle layout for shortcut pattern
-          if (index === 0) { // Class A - left
-            screenX = centerX - nodeSpacing * 0.8;
-            screenY = centerY;
-          } else if (index === 1) { // Class B - top center
+          // Modified triangle layout for shortcut pattern
+          if (index === 0) { // Class A - positioned around Class B (top-left)
+            screenX = centerX - nodeSpacing * 0.6;
+            screenY = centerY - nodeSpacing * 0.5;
+          } else if (index === 1) { // Class B - center
             screenX = centerX;
-            screenY = centerY - nodeSpacing * 0.7;
-          } else if (index === 2) { // Class C - right
-            screenX = centerX + nodeSpacing * 0.8;
             screenY = centerY;
-          } else { // New class - bottom
+          } else if (index === 2) { // Class C - bottom
             screenX = centerX;
-            screenY = centerY + nodeSpacing * 0.9;
+            screenY = centerY + nodeSpacing * 0.8;
+          } else { // New class - left
+            screenX = centerX - nodeSpacing * 1.2;
+            screenY = centerY;
           }
         } else {
           // Horizontal layout for normal pattern
