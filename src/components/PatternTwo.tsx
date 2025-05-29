@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,45 +19,109 @@ export const PatternTwo = () => {
   const [result, setResult] = useState(null);
   const [prompt, setPrompt] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [fewShotData, setFewShotData] = useState([]);
+
+  const buildPayload = () => {
+    const basePayload = {
+      A_label: classA,
+      p_label: propertyP,
+      B_label: classB,
+      C_label: classC,
+      use_few_shot: useFewShot,
+      few_shot_examples: useFewShot ? fewShotData : []
+    };
+    return basePayload;
+  };
 
   const handleGenerate = async () => {
     setIsLoading(true);
     setPrompt(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const mockResult = {
-      class_name: 'StorageSystem',
-      explanation: 'This specialized subclass represents systems that specifically include storage devices as components. It inherits from System while being more specific about the type of components it contains.'
-    };
-    
-    setResult(mockResult);
-    setIsLoading(false);
-    
-    toast({
-      title: "Subclass Generated Successfully",
-      description: "New specialized subclass has been created",
-    });
+    try {
+      const payload = buildPayload();
+      console.log('Calling /generate_subclass with payload:', payload);
+      
+      // Simulate API call to /generate_subclass endpoint
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockResult = {
+        class_name: 'StorageSystem',
+        explanation: useFewShot 
+          ? 'This specialized subclass represents systems that specifically include storage devices as components. It inherits from System while being more specific about the type of components it contains. Based on the provided few-shot examples, this follows established patterns for creating specialized subclasses that represent entities with specific component relationships.'
+          : 'This specialized subclass represents systems that specifically include storage devices as components. It inherits from System while being more specific about the type of components it contains.'
+      };
+      
+      setResult(mockResult);
+      
+      toast({
+        title: "Subclass Generated Successfully",
+        description: "New specialized subclass has been created",
+      });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate subclass",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleShowPrompt = async () => {
     setIsLoading(true);
     setResult(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockPrompt = `Generate a specialized subclass for the pattern:
+    try {
+      const payload = buildPayload();
+      console.log('Calling /subclass_prompt with payload:', payload);
+      
+      // Simulate API call to /subclass_prompt endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const mockPrompt = useFewShot 
+        ? `Generate a specialized subclass for the pattern using few-shot learning:
+
+Few-shot examples:
+${fewShotData.map((example, index) => 
+  `Example ${index + 1}:
+  - Class A: ${example['?A_label']}
+  - Property p: ${example['?p_label']}
+  - Class B: ${example['?B_label']}
+  - Class C (subclass of B): ${example['?C_label']}
+  - Result Subclass: ${example.Subclass}
+  - Human annotation: ${example.Human || 'N/A'}`
+).join('\n\n')}
+
+Now generate for:
+Class A: ${classA}
+Property p: ${propertyP}
+Class B: ${classB}
+Class C (subclass of B): ${classC}
+
+Create a new subclass of ${classA} that represents ${classA} instances that have ${classC} as components, following the patterns shown in the examples above.`
+        : `Generate a specialized subclass for the pattern:
 Class A: ${classA}
 Property p: ${propertyP}
 Class B: ${classB}
 Class C (subclass of B): ${classC}
 
 Create a new subclass of ${classA} that represents ${classA} instances that have ${classC} as components.`;
-    
-    setPrompt(mockPrompt);
-    setIsLoading(false);
+      
+      setPrompt(mockPrompt);
+    } catch (error) {
+      toast({
+        title: "Prompt Retrieval Failed",
+        description: "Failed to retrieve complete prompt",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFewShotDataChange = (newData) => {
+    setFewShotData(newData);
   };
 
   const graphData = {
@@ -146,7 +211,12 @@ Create a new subclass of ${classA} that represents ${classA} instances that have
               </Label>
             </div>
 
-            {useFewShot && <FewShotEditor pattern="subclass" />}
+            {useFewShot && (
+              <FewShotEditor 
+                pattern="subclass" 
+                onDataChange={handleFewShotDataChange}
+              />
+            )}
 
             <div className="flex space-x-4">
               <Button

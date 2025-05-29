@@ -10,9 +10,10 @@ import { FewShotFileUpload } from './FewShotFileUpload';
 
 interface FewShotEditorProps {
   pattern: 'shortcut' | 'subclass';
+  onDataChange?: (data: any[]) => void;
 }
 
-export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
+export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern, onDataChange }) => {
   const [csvData, setCsvData] = useState<any[]>([]);
 
   const requiredColumns = pattern === 'shortcut' 
@@ -29,6 +30,13 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
       setCsvData([]);
     }
   }, [pattern]);
+
+  // Notify parent when data changes
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange(csvData);
+    }
+  }, [csvData, onDataChange]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
