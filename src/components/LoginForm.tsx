@@ -43,12 +43,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           <img 
             src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
             alt="ONTO-DESIDE Logo" 
-            className="h-22 object-contain opacity-80"
+            className="h-21 object-contain opacity-80"
           />
           <img 
             src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
             alt="VSE Faculty Logo" 
-            className="h-22 object-contain opacity-80"
+            className="h-21 object-contain opacity-80"
           />
         </div>
       </div>
