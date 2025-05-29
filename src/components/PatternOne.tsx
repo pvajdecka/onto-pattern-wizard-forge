@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,50 +135,6 @@ Create a direct property that connects ${classA} to ${classC} via the property c
                   />
                 </div>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="fewshot"
-                  checked={useFewShot}
-                  onCheckedChange={(checked) => setUseFewShot(checked === true)}
-                />
-                <Label htmlFor="fewshot" className="text-sm font-medium text-gray-700">
-                  Use Few-Shot Examples
-                </Label>
-              </div>
-
-              {useFewShot && <FewShotEditor pattern="shortcut" />}
-
-              <div className="flex space-x-4">
-                <Button
-                  onClick={handleGenerate}
-                  disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Generating...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Play className="h-4 w-4" />
-                      <span>Generate Shortcut</span>
-                    </div>
-                  )}
-                </Button>
-                <Button
-                  onClick={handleShowPrompt}
-                  disabled={isLoading}
-                  variant="outline"
-                  className="flex-1 border-green-300 text-green-700 hover:bg-green-50"
-                >
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4" />
-                    <span>Show Prompt</span>
-                  </div>
-                </Button>
-              </div>
             </div>
 
             {/* 3D Visualization */}
@@ -188,6 +143,53 @@ Create a direct property that connects ${classA} to ${classC} via the property c
               <div className="h-96 border-2 border-green-200 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50">
                 <NetworkGraph3D data={graphData} />
               </div>
+            </div>
+          </div>
+
+          {/* Few-Shot Section */}
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="fewshot"
+                checked={useFewShot}
+                onCheckedChange={(checked) => setUseFewShot(checked === true)}
+              />
+              <Label htmlFor="fewshot" className="text-sm font-medium text-gray-700">
+                Use Few-Shot Examples
+              </Label>
+            </div>
+
+            {useFewShot && <FewShotEditor pattern="shortcut" />}
+
+            <div className="flex space-x-4">
+              <Button
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+              >
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Generating...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Play className="h-4 w-4" />
+                    <span>Generate Shortcut</span>
+                  </div>
+                )}
+              </Button>
+              <Button
+                onClick={handleShowPrompt}
+                disabled={isLoading}
+                variant="outline"
+                className="flex-1 border-green-300 text-green-700 hover:bg-green-50"
+              >
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Show Prompt</span>
+                </div>
+              </Button>
             </div>
           </div>
 
