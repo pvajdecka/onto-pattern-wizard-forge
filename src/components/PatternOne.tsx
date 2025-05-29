@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,26 +42,30 @@ export const PatternOne = () => {
       const payload = buildPayload();
       console.log('Calling /generate_shortcut with payload:', payload);
       
-      // Simulate API call to /generate_shortcut endpoint
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockResult = {
-        property_name: 'has_music_genre',
-        explanation: useFewShot 
-          ? 'This property creates a direct relationship between corpus parts and music genres, bypassing the intermediate Genre class. Based on the provided few-shot examples, it represents the transitive closure of the genre → has sub-genre property chain with additional contextual understanding from similar patterns.'
-          : 'This property creates a direct relationship between corpus parts and music genres, bypassing the intermediate Genre class. It represents the transitive closure of the genre → has sub-genre property chain.'
-      };
-      
-      setResult(mockResult);
+      const response = await fetch('/generate_shortcut', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setResult(result);
       
       toast({
         title: "Pattern Generated Successfully",
         description: "New shortcut property has been created",
       });
     } catch (error) {
+      console.error('Generate shortcut error:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate shortcut property",
+        description: error.message || "Failed to generate shortcut property",
         variant: "destructive",
       });
     } finally {
@@ -78,45 +81,25 @@ export const PatternOne = () => {
       const payload = buildPayload();
       console.log('Calling /shortcut_prompt with payload:', payload);
       
-      // Simulate API call to /shortcut_prompt endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockPrompt = useFewShot 
-        ? `Generate a shortcut property for the pattern using few-shot learning:
+      const response = await fetch('/shortcut_prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-Few-shot examples:
-${fewShotData.map((example, index) => 
-  `Example ${index + 1}:
-  - Class A: ${example['?A_label']}
-  - Property p: ${example['?p_label']}
-  - Class B: ${example['?B_label']}
-  - Property r: ${example['?r_label']}
-  - Class C: ${example['?C_label']}
-  - Result Property: ${example.Property}`
-).join('\n\n')}
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
 
-Now generate for:
-Class A: ${classA}
-Property p: ${propertyP}
-Class B: ${classB}
-Property r: ${propertyR}
-Class C: ${classC}
-
-Create a direct property that connects ${classA} to ${classC} via the property chain ${propertyP} → ${propertyR}, following the patterns shown in the examples above.`
-        : `Generate a shortcut property for the pattern:
-Class A: ${classA}
-Property p: ${propertyP}
-Class B: ${classB}
-Property r: ${propertyR}
-Class C: ${classC}
-
-Create a direct property that connects ${classA} to ${classC} via the property chain ${propertyP} → ${propertyR}.`;
-      
-      setPrompt(mockPrompt);
+      const result = await response.json();
+      setPrompt(result.prompt);
     } catch (error) {
+      console.error('Show prompt error:', error);
       toast({
         title: "Prompt Retrieval Failed",
-        description: "Failed to retrieve complete prompt",
+        description: error.message || "Failed to retrieve complete prompt",
         variant: "destructive",
       });
     } finally {

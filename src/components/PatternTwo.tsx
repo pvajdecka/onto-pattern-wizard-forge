@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,26 +40,30 @@ export const PatternTwo = () => {
       const payload = buildPayload();
       console.log('Calling /generate_subclass with payload:', payload);
       
-      // Simulate API call to /generate_subclass endpoint
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockResult = {
-        class_name: 'StorageSystem',
-        explanation: useFewShot 
-          ? 'This specialized subclass represents systems that specifically include storage devices as components. It inherits from System while being more specific about the type of components it contains. Based on the provided few-shot examples, this follows established patterns for creating specialized subclasses that represent entities with specific component relationships.'
-          : 'This specialized subclass represents systems that specifically include storage devices as components. It inherits from System while being more specific about the type of components it contains.'
-      };
-      
-      setResult(mockResult);
+      const response = await fetch('/generate_subclass', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setResult(result);
       
       toast({
         title: "Subclass Generated Successfully",
         description: "New specialized subclass has been created",
       });
     } catch (error) {
+      console.error('Generate subclass error:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate subclass",
+        description: error.message || "Failed to generate subclass",
         variant: "destructive",
       });
     } finally {
@@ -76,43 +79,25 @@ export const PatternTwo = () => {
       const payload = buildPayload();
       console.log('Calling /subclass_prompt with payload:', payload);
       
-      // Simulate API call to /subclass_prompt endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockPrompt = useFewShot 
-        ? `Generate a specialized subclass for the pattern using few-shot learning:
+      const response = await fetch('/subclass_prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-Few-shot examples:
-${fewShotData.map((example, index) => 
-  `Example ${index + 1}:
-  - Class A: ${example['?A_label']}
-  - Property p: ${example['?p_label']}
-  - Class B: ${example['?B_label']}
-  - Class C (subclass of B): ${example['?C_label']}
-  - Result Subclass: ${example.Subclass}
-  - Human annotation: ${example.Human || 'N/A'}`
-).join('\n\n')}
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
 
-Now generate for:
-Class A: ${classA}
-Property p: ${propertyP}
-Class B: ${classB}
-Class C (subclass of B): ${classC}
-
-Create a new subclass of ${classA} that represents ${classA} instances that have ${classC} as components, following the patterns shown in the examples above.`
-        : `Generate a specialized subclass for the pattern:
-Class A: ${classA}
-Property p: ${propertyP}
-Class B: ${classB}
-Class C (subclass of B): ${classC}
-
-Create a new subclass of ${classA} that represents ${classA} instances that have ${classC} as components.`;
-      
-      setPrompt(mockPrompt);
+      const result = await response.json();
+      setPrompt(result.prompt);
     } catch (error) {
+      console.error('Show prompt error:', error);
       toast({
         title: "Prompt Retrieval Failed",
-        description: "Failed to retrieve complete prompt",
+        description: error.message || "Failed to retrieve complete prompt",
         variant: "destructive",
       });
     } finally {
