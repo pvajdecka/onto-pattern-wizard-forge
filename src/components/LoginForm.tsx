@@ -130,10 +130,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
               </form>
             </CardContent>
           </Card>
-
-          <div className="text-center text-sm text-slate-500">
-            Demo credentials: peter/VSE or vojtech/VSE
-          </div>
         </div>
       </div>
     </div>
