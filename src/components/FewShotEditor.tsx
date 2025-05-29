@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload, FileText } from 'lucide-react';
@@ -11,6 +11,131 @@ interface FewShotEditorProps {
 
 export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
   const [csvData, setCsvData] = useState<any[]>([]);
+
+  // Preloaded data for shortcut pattern
+  const preloadedShortcutData = [
+    {
+      A_label: 'Emission Conversion Factor',
+      p_label: 'has applicable period',
+      B_label: 'Temporal entity',
+      r_label: 'has beginning',
+      C_label: 'Time instant',
+      Property: 'Applicable Period Start'
+    },
+    {
+      A_label: 'Emission Conversion Factor',
+      p_label: 'has applicable period',
+      B_label: 'Temporal entity',
+      r_label: 'has beginning',
+      C_label: 'Time instant',
+      Property: 'Applicable From Time'
+    },
+    {
+      A_label: 'Emission Conversion Factor',
+      p_label: 'has applicable period',
+      B_label: 'Temporal entity',
+      r_label: 'has end',
+      C_label: 'Time instant',
+      Property: 'Applicable Period End'
+    },
+    {
+      A_label: 'Emission Conversion Factor',
+      p_label: 'has applicable period',
+      B_label: 'Temporal entity',
+      r_label: 'has end',
+      C_label: 'Time instant',
+      Property: 'Applicable Until Time'
+    },
+    {
+      A_label: 'Collaboration Concept',
+      p_label: 'uses component',
+      B_label: 'Component Module',
+      r_label: 'includes functional component',
+      C_label: 'Functional Module',
+      Property: "Component's Functional Module"
+    },
+    {
+      A_label: 'Collaboration Concept',
+      p_label: 'uses component',
+      B_label: 'Component Module',
+      r_label: 'includes functional component',
+      C_label: 'Functional Module',
+      Property: 'Composed Of Functional Module'
+    },
+    {
+      A_label: 'AccessConditionSet',
+      p_label: 'hasVariable',
+      B_label: 'Variable',
+      r_label: 'hasValue',
+      C_label: 'Value',
+      Property: "Variable's Value"
+    },
+    {
+      A_label: 'AccessConditionSet',
+      p_label: 'hasVariable',
+      B_label: 'Variable',
+      r_label: 'hasValue',
+      C_label: 'Value',
+      Property: 'Defines Variable Value'
+    },
+    {
+      A_label: 'SLA Class',
+      p_label: 'SLA Contains',
+      B_label: 'Term of the agreement',
+      r_label: 'Term Compensation',
+      C_label: 'Conditions of compensation',
+      Property: 'Defines Compensation Terms'
+    },
+    {
+      A_label: 'SLA Class',
+      p_label: 'SLA Contains',
+      B_label: 'Term of the agreement',
+      r_label: 'Include Defs',
+      C_label: 'Definitions of the agreement',
+      Property: 'includes agreement definitions'
+    },
+    {
+      A_label: 'Space',
+      p_label: 'has usergroup',
+      B_label: 'Usergroup',
+      r_label: 'has member',
+      C_label: 'User Account',
+      Property: 'User Associated with Usergroup'
+    },
+    {
+      A_label: 'Group of Tables',
+      p_label: 'table',
+      B_label: 'Annotated Table',
+      r_label: 'row',
+      C_label: 'Row',
+      Property: 'Annotated Table Row'
+    },
+    {
+      A_label: 'Occurrence',
+      p_label: 'is detected by',
+      B_label: 'Device',
+      r_label: 'has interface',
+      C_label: 'Interface',
+      Property: 'Detected Through Device Interface'
+    },
+    {
+      A_label: 'Organization',
+      p_label: 'delivery location',
+      B_label: 'Residence Object',
+      r_label: 'addres',
+      C_label: 'BasicAddress',
+      Property: 'Has Delivery Address'
+    }
+  ];
+
+  // Load preloaded data when pattern changes
+  useEffect(() => {
+    if (pattern === 'shortcut') {
+      setCsvData(preloadedShortcutData);
+    } else {
+      setCsvData([]);
+    }
+  }, [pattern]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -77,6 +202,7 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
           <div className="mt-4">
             <p className="text-sm font-medium text-amber-700 mb-2">
               Currently {csvData.length} few-shot examples loaded
+              {pattern === 'shortcut' && csvData === preloadedShortcutData && ' (preloaded)'}
             </p>
             <div className="max-h-32 overflow-y-auto bg-white rounded border border-amber-200">
               <table className="w-full text-xs">
