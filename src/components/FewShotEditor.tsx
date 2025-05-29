@@ -22,9 +22,9 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
   // Load preloaded data when pattern changes
   useEffect(() => {
     if (pattern === 'shortcut') {
-      setCsvData(preloadedShortcutData);
+      setCsvData([...preloadedShortcutData]);
     } else if (pattern === 'subclass') {
-      setCsvData(preloadedSubclassData);
+      setCsvData([...preloadedSubclassData]);
     } else {
       setCsvData([]);
     }
@@ -55,10 +55,17 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
       });
     };
     reader.readAsText(file);
+    
+    // Reset the input value to allow uploading the same file again
+    event.target.value = '';
   };
 
-  const isPreloaded = (pattern === 'shortcut' && csvData === preloadedShortcutData) || 
-                     (pattern === 'subclass' && csvData === preloadedSubclassData);
+  const handleDataChange = (newData: any[]) => {
+    setCsvData(newData);
+  };
+
+  const isPreloaded = (pattern === 'shortcut' && JSON.stringify(csvData) === JSON.stringify(preloadedShortcutData)) || 
+                     (pattern === 'subclass' && JSON.stringify(csvData) === JSON.stringify(preloadedSubclassData));
 
   return (
     <Card className="border-amber-200 bg-amber-50/50">
@@ -78,6 +85,7 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
           csvData={csvData}
           requiredColumns={requiredColumns}
           isPreloaded={isPreloaded}
+          onDataChange={handleDataChange}
         />
       </CardContent>
     </Card>
