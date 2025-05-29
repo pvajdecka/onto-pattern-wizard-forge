@@ -36,7 +36,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50 to-cyan-50">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       {/* Logo background */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5">
         <div className="text-slate-600 text-[20rem] font-bold">
@@ -47,14 +47,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       <div className="w-full max-w-md space-y-8 relative z-10">
         {/* Header with logos */}
         <div className="text-center space-y-6">
-          <div className="flex justify-center space-x-8 mb-8 p-6 bg-white/40 backdrop-blur-sm rounded-2xl">
+          <div className="flex justify-center space-x-8 mb-8 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
             <img 
-              src="/lovable-uploads/45e896f0-0815-4fa3-8746-42073724881f.png" 
+              src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
               alt="ONTO-DESIDE Logo" 
               className="h-16 object-contain"
             />
             <img 
-              src="/lovable-uploads/b7c077ba-3834-426a-969e-196a9a29ea31.png" 
+              src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
               alt="VSE Faculty Logo" 
               className="h-16 object-contain"
             />
@@ -67,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           </p>
         </div>
 
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-2xl border border-gray-200 bg-white">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl text-center text-slate-800">
               Sign In
