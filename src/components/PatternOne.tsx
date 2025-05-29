@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,9 +63,9 @@ Create a direct property that connects ${classA} to ${classC} via the property c
 
   const graphData = {
     nodes: [
-      { id: 'A', label: classA, color: '#10b981', x: -1.5, y: 1.5, z: 0 },
+      { id: 'A', label: classA, color: '#10b981', x: -2, y: 1, z: 0 },
       { id: 'B', label: classB, color: '#059669', x: 0, y: 0, z: 0 },
-      { id: 'C', label: classC, color: '#047857', x: 1.5, y: -1.5, z: 0 },
+      { id: 'C', label: classC, color: '#047857', x: 2, y: -1, z: 0 },
     ],
     links: [
       { source: 'A', target: 'B', label: propertyP, color: '#6b7280' },
