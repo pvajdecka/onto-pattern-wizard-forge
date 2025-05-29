@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -183,7 +184,7 @@ Create a direct property that connects ${classA} to ${classC} via the property c
 
             {/* 3D Visualization */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">Interactive 3D Graph</h3>
+              <h3 className="text-lg font-semibold text-gray-800">Graph</h3>
               <div className="h-96 border-2 border-green-200 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50">
                 <NetworkGraph3D data={graphData} />
               </div>
