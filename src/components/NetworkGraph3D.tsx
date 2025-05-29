@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 
 interface Node {
@@ -62,51 +61,14 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       return Math.min(minRadius, 60); // Cap at 60px
     };
 
-    // Function to check if two circles intersect
-    const circlesIntersect = (x1: number, y1: number, r1: number, x2: number, y2: number, r2: number) => {
-      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-      return distance < (r1 + r2 + 20); // Add 20px buffer
-    };
-
-    // Function to adjust positions to prevent intersections
+    // Simplified position adjustment without complex collision detection
     const adjustPositions = (nodes: any[]) => {
-      const adjustedNodes = [...nodes];
-      const maxIterations = 50;
-      
-      for (let iteration = 0; iteration < maxIterations; iteration++) {
-        let hasIntersection = false;
-        
-        for (let i = 0; i < adjustedNodes.length; i++) {
-          for (let j = i + 1; j < adjustedNodes.length; j++) {
-            const node1 = adjustedNodes[i];
-            const node2 = adjustedNodes[j];
-            
-            if (circlesIntersect(node1.screenX, node1.screenY, node1.radius, node2.screenX, node2.screenY, node2.radius)) {
-              hasIntersection = true;
-              
-              // Calculate repulsion vector
-              const dx = node2.screenX - node1.screenX;
-              const dy = node2.screenY - node1.screenY;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              
-              if (distance > 0) {
-                const overlap = (node1.radius + node2.radius + 20) - distance;
-                const moveX = (dx / distance) * overlap * 0.5;
-                const moveY = (dy / distance) * overlap * 0.5;
-                
-                node1.screenX -= moveX;
-                node1.screenY -= moveY;
-                node2.screenX += moveX;
-                node2.screenY += moveY;
-              }
-            }
-          }
-        }
-        
-        if (!hasIntersection) break;
-      }
-      
-      return adjustedNodes;
+      return nodes.map(node => ({
+        ...node,
+        screenX: node.screenX,
+        screenY: node.screenY,
+        radius: node.radius
+      }));
     };
 
     const draw = () => {
@@ -117,7 +79,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Apply rotation
+      // Apply smooth rotation
       const cos = Math.cos(rotation);
       const sin = Math.sin(rotation);
 
@@ -133,11 +95,11 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           screenX: centerX + x * scale,
           screenY: centerY + y * scale,
           z: z,
-          radius: radius + z * 3 // Perspective effect
+          radius: radius + z * 2 // Subtle perspective effect
         };
       });
 
-      // Adjust positions to prevent intersections
+      // Use simplified position adjustment
       const adjustedNodes = adjustPositions(nodesWithPositions);
 
       // Draw links
@@ -252,7 +214,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.shadowOffsetY = 0;
       });
 
-      rotation += 0.008; // Slightly slower rotation
+      rotation += 0.006; // Smooth rotation speed
       animationRef.current = requestAnimationFrame(draw);
     };
 
