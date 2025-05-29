@@ -40,6 +40,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       {/* Main content area */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md space-y-4 relative z-10">
+          {/* Logos above Welcome Back */}
+          <div className="w-full pb-6">
+            <div className="flex justify-center space-x-8 p-2">
+              <img 
+                src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
+                alt="ONTO-DESIDE Logo" 
+                className="h-20 object-contain opacity-80"
+              />
+              <img 
+                src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
+                alt="VSE Faculty Logo" 
+                className="h-20 object-contain opacity-80"
+              />
+            </div>
+          </div>
+
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-700 to-green-700 bg-clip-text text-transparent">
