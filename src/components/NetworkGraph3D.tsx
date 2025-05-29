@@ -51,28 +51,74 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Function to calculate optimal node radius based on text
-    const calculateNodeRadius = (text: string, baseRadius: number = 35) => {
-      ctx.font = 'bold 12px Inter, sans-serif';
-      const textWidth = ctx.measureText(text).width;
-      const minRadius = Math.max(baseRadius, (textWidth / 2) + 20);
-      return Math.min(minRadius, 80); // Increased cap to 80px
+    // Function to split text into lines
+    const splitTextIntoLines = (text: string, maxWidth: number) => {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      ctx.font = 'bold 11px Inter, sans-serif';
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = ctx.measureText(testLine).width;
+        
+        if (testWidth <= maxWidth) {
+          currentLine = testLine;
+        } else {
+          if (currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            // Single word is too long, split it
+            lines.push(word);
+          }
+        }
+      }
+      
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
+      return lines;
+    };
+
+    // Function to calculate optimal node radius based on text lines
+    const calculateNodeRadius = (text: string) => {
+      const maxLineWidth = 120; // Maximum width for text within circle
+      const lines = splitTextIntoLines(text, maxLineWidth);
+      const lineHeight = 14;
+      const padding = 25;
+      
+      // Calculate radius based on text dimensions
+      const textHeight = lines.length * lineHeight;
+      const maxTextWidth = Math.max(...lines.map(line => {
+        ctx.font = 'bold 11px Inter, sans-serif';
+        return ctx.measureText(line).width;
+      }));
+      
+      const radiusForWidth = (maxTextWidth / 2) + padding;
+      const radiusForHeight = (textHeight / 2) + padding;
+      
+      return Math.max(radiusForWidth, radiusForHeight, 35);
     };
 
     // Function to check if two circles intersect
     const circlesIntersect = (x1: number, y1: number, r1: number, x2: number, y2: number, r2: number) => {
       const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-      return distance < (r1 + r2 + 30); // Increased buffer to 30px
+      return distance < (r1 + r2 + 40);
     };
 
-    // Function to adjust positions to prevent intersections
-    const adjustPositions = (nodes: any[]) => {
+    // Function to adjust positions to prevent intersections and ensure visibility
+    const adjustPositions = (nodes: any[], canvasWidth: number, canvasHeight: number) => {
       const adjustedNodes = [...nodes];
-      const maxIterations = 100;
+      const maxIterations = 150;
+      const margin = 20; // Margin from canvas edges
       
       for (let iteration = 0; iteration < maxIterations; iteration++) {
         let hasIntersection = false;
         
+        // Check and fix intersections
         for (let i = 0; i < adjustedNodes.length; i++) {
           for (let j = i + 1; j < adjustedNodes.length; j++) {
             const node1 = adjustedNodes[i];
@@ -81,13 +127,12 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
             if (circlesIntersect(node1.screenX, node1.screenY, node1.radius, node2.screenX, node2.screenY, node2.radius)) {
               hasIntersection = true;
               
-              // Calculate repulsion vector
               const dx = node2.screenX - node1.screenX;
               const dy = node2.screenY - node1.screenY;
               const distance = Math.sqrt(dx * dx + dy * dy);
               
               if (distance > 0) {
-                const overlap = (node1.radius + node2.radius + 30) - distance;
+                const overlap = (node1.radius + node2.radius + 40) - distance;
                 const moveX = (dx / distance) * overlap * 0.5;
                 const moveY = (dy / distance) * overlap * 0.5;
                 
@@ -100,6 +145,17 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           }
         }
         
+        // Ensure nodes stay within canvas bounds
+        adjustedNodes.forEach(node => {
+          const minX = margin + node.radius;
+          const maxX = canvasWidth - margin - node.radius;
+          const minY = margin + node.radius;
+          const maxY = canvasHeight - margin - node.radius;
+          
+          node.screenX = Math.max(minX, Math.min(maxX, node.screenX));
+          node.screenY = Math.max(minY, Math.min(maxY, node.screenY));
+        });
+        
         if (!hasIntersection) break;
       }
       
@@ -110,11 +166,14 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const rect = canvas.getBoundingClientRect();
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const scale = 100; // Increased scale for better visibility
+      
+      // Dynamically adjust scale based on canvas size and number of nodes
+      const baseScale = Math.min(rect.width, rect.height) / 8;
+      const scale = Math.max(baseScale, 60);
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // No rotation - static positions
+      // Calculate node positions and radii
       const nodesWithPositions = data.nodes.map(node => {
         const radius = calculateNodeRadius(node.label);
         
@@ -127,8 +186,8 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         };
       });
 
-      // Adjust positions to prevent intersections
-      const adjustedNodes = adjustPositions(nodesWithPositions);
+      // Adjust positions to prevent intersections and ensure visibility
+      const adjustedNodes = adjustPositions(nodesWithPositions, rect.width, rect.height);
 
       // Draw links
       data.links.forEach(link => {
@@ -164,14 +223,14 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         
         ctx.stroke();
 
-        // Draw label with background
+        // Draw link label with background
         const midX = (startEdgeX + endEdgeX) / 2;
         const midY = (startEdgeY + endEdgeY) / 2;
         
-        ctx.font = '12px Inter, sans-serif';
+        ctx.font = '11px Inter, sans-serif';
         const textMetrics = ctx.measureText(link.label);
         const textWidth = textMetrics.width;
-        const textHeight = 16;
+        const textHeight = 14;
         
         // Draw text background
         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
@@ -186,10 +245,10 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         // Draw text
         ctx.fillStyle = '#374151';
         ctx.textAlign = 'center';
-        ctx.fillText(link.label, midX, midY + 5);
+        ctx.fillText(link.label, midX, midY + 4);
       });
 
-      // Draw nodes
+      // Draw nodes with multi-line text
       adjustedNodes.forEach(node => {
         const screenX = node.screenX;
         const screenY = node.screenY;
@@ -198,7 +257,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         // Draw node circle with gradient
         const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, radius);
         gradient.addColorStop(0, node.color);
-        gradient.addColorStop(1, node.color + 'DD'); // Add transparency at edges
+        gradient.addColorStop(1, node.color + 'DD');
         
         ctx.beginPath();
         ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
@@ -215,25 +274,25 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Draw node label with proper sizing
+        // Draw multi-line node label
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.font = 'bold 11px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
         ctx.shadowBlur = 3;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
-        // Handle multi-line text for long labels
-        const words = node.label.split(' ');
-        if (words.length > 1 && ctx.measureText(node.label).width > radius * 1.4) {
-          const line1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
-          const line2 = words.slice(Math.ceil(words.length / 2)).join(' ');
-          ctx.fillText(line1, screenX, screenY - 4);
-          ctx.fillText(line2, screenX, screenY + 10);
-        } else {
-          ctx.fillText(node.label, screenX, screenY + 4);
-        }
+        const maxLineWidth = radius * 1.6;
+        const lines = splitTextIntoLines(node.label, maxLineWidth);
+        const lineHeight = 14;
+        const totalTextHeight = lines.length * lineHeight;
+        const startY = screenY - (totalTextHeight / 2) + (lineHeight / 2);
+        
+        lines.forEach((line, index) => {
+          const y = startY + (index * lineHeight);
+          ctx.fillText(line, screenX, y);
+        });
         
         // Reset shadow
         ctx.shadowColor = 'transparent';
