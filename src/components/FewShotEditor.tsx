@@ -16,8 +16,8 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
   const [csvData, setCsvData] = useState<any[]>([]);
 
   const requiredColumns = pattern === 'shortcut' 
-    ? ['A_label', 'p_label', 'B_label', 'r_label', 'C_label', 'Property']
-    : ['A_label', 'p_label', 'B_label', 'C_label', 'Subclass'];
+    ? ['?A_label', '?p_label', '?B_label', '?r_label', '?C_label', 'Property']
+    : ['?A_label', '?p_label', '?B_label', '?C_label', 'Subclass', 'Human'];
 
   // Load preloaded data when pattern changes
   useEffect(() => {
