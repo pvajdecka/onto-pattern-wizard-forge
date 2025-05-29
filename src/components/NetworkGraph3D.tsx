@@ -32,9 +32,6 @@ interface NetworkGraph3DProps {
 export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
-  const [graphOffset, setGraphOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,49 +52,6 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-
-    // Mouse event handlers
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsDragging(true);
-      const rect = canvas.getBoundingClientRect();
-      setLastMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const rect = canvas.getBoundingClientRect();
-      const currentMousePos = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-      
-      const deltaX = currentMousePos.x - lastMousePos.x;
-      const deltaY = currentMousePos.y - lastMousePos.y;
-      
-      setGraphOffset(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY
-      }));
-      
-      setLastMousePos(currentMousePos);
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    const handleMouseLeave = () => {
-      setIsDragging(false);
-    };
-
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseup', handleMouseUp);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     // Function to calculate optimal node radius based on text
     const calculateNodeRadius = (text: string, baseRadius: number = 30) => {
@@ -162,8 +116,8 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
-      const centerX = rect.width / 2 + graphOffset.x;
-      const centerY = rect.height / 2 + graphOffset.y;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
       const scale = 80;
 
       ctx.clearRect(0, 0, rect.width, rect.height);
@@ -307,20 +261,16 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseup', handleMouseUp);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [data, isDragging, graphOffset]);
+  }, [data]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-full rounded-lg cursor-grab active:cursor-grabbing"
+      className="w-full h-full rounded-lg"
       style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)' }}
     />
   );
