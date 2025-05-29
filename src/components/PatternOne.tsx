@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -140,7 +139,7 @@ Create a direct property that connects ${classA} to ${classC} via the property c
                 <Checkbox
                   id="fewshot"
                   checked={useFewShot}
-                  onCheckedChange={setUseFewShot}
+                  onCheckedChange={(checked) => setUseFewShot(checked === true)}
                 />
                 <Label htmlFor="fewshot" className="text-sm font-medium text-gray-700">
                   Use Few-Shot Examples

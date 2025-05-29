@@ -15,7 +15,7 @@ import { PatternTwo } from '@/components/PatternTwo';
 import { SessionHistory } from '@/components/SessionHistory';
 import { Documentation } from '@/components/Documentation';
 import { ModelParameters } from '@/components/ModelParameters';
-import { Sidebar } from '@/components/AppSidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 const Index = () => {

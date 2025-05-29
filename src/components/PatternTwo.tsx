@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,6 +86,7 @@ Create a new subclass of ${classA} that represents ${classA} instances that have
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Input Section */}
             <div className="space-y-6">
+              {/* Input fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
@@ -130,7 +130,7 @@ Create a new subclass of ${classA} that represents ${classA} instances that have
                 <Checkbox
                   id="fewshot-2"
                   checked={useFewShot}
-                  onCheckedChange={setUseFewShot}
+                  onCheckedChange={(checked) => setUseFewShot(checked === true)}
                 />
                 <Label htmlFor="fewshot-2" className="text-sm font-medium text-gray-700">
                   Use Few-Shot Examples
