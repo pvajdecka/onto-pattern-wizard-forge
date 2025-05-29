@@ -55,13 +55,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
       {/* Main content area */}
       <div className="flex-1 flex items-center justify-center">
-        {/* Logo background */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-5">
-          <div className="text-slate-600 text-[20rem] font-bold">
-            ONTO-DESIDE
-          </div>
-        </div>
-        
         <div className="w-full max-w-md space-y-4 relative z-10">
           {/* Header */}
           <div className="text-center space-y-4">
