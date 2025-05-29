@@ -4,9 +4,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -15,8 +12,8 @@ import { ModelParameters } from '@/components/ModelParameters';
 
 export const AppSidebar = () => {
   return (
-    <Sidebar className="border-r border-green-200">
-      <SidebarHeader className="p-6 border-b border-green-200">
+    <Sidebar className="border-r border-slate-200 bg-gradient-to-b from-slate-100 via-blue-50 to-cyan-50">
+      <SidebarHeader className="p-6 border-b border-slate-200 bg-white/40 backdrop-blur-sm">
         <div className="space-y-4">
           <img 
             src="/lovable-uploads/45e896f0-0815-4fa3-8746-42073724881f.png" 
@@ -32,7 +29,7 @@ export const AppSidebar = () => {
       </SidebarHeader>
       <SidebarContent className="p-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-green-700 font-semibold">
+          <SidebarGroupLabel className="text-slate-700 font-semibold">
             Model Configuration
           </SidebarGroupLabel>
           <SidebarGroupContent>
