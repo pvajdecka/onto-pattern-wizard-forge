@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 
 interface Node {
@@ -30,7 +31,6 @@ interface NetworkGraph3DProps {
 
 export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -52,24 +52,12 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    let rotation = 0;
-
     // Function to calculate optimal node radius based on text
-    const calculateNodeRadius = (text: string, baseRadius: number = 30) => {
-      ctx.font = 'bold 11px Inter, sans-serif';
+    const calculateNodeRadius = (text: string, baseRadius: number = 35) => {
+      ctx.font = 'bold 12px Inter, sans-serif';
       const textWidth = ctx.measureText(text).width;
-      const minRadius = Math.max(baseRadius, (textWidth / 2) + 15);
-      return Math.min(minRadius, 60); // Cap at 60px
-    };
-
-    // Simplified position adjustment without complex collision detection
-    const adjustPositions = (nodes: any[]) => {
-      return nodes.map(node => ({
-        ...node,
-        screenX: node.screenX,
-        screenY: node.screenY,
-        radius: node.radius
-      }));
+      const minRadius = Math.max(baseRadius, (textWidth / 2) + 20);
+      return Math.min(minRadius, 70); // Cap at 70px for better visibility
     };
 
     // Function to draw curved line for shortcut properties
@@ -89,8 +77,8 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const perpX = -unitY;
       const perpY = unitX;
       
-      // Control point offset (curve outward)
-      const curveOffset = 80;
+      // Control point offset (curve outward more for better visibility)
+      const curveOffset = 120;
       const controlX = midX + perpX * curveOffset;
       const controlY = midY + perpY * curveOffset;
 
@@ -104,62 +92,51 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       ctx.stroke();
 
       // Draw label at the curve's peak
-      ctx.font = '11px Inter, sans-serif';
+      ctx.font = 'bold 12px Inter, sans-serif';
       const textMetrics = ctx.measureText(label);
       const textWidth = textMetrics.width;
-      const textHeight = 14;
+      const textHeight = 16;
       
       // Draw text background
       ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.fillRect(controlX - textWidth/2 - 4, controlY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+      ctx.fillRect(controlX - textWidth/2 - 6, controlY - textHeight/2 - 3, textWidth + 12, textHeight + 6);
       
       // Draw text border
       ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
-      ctx.strokeRect(controlX - textWidth/2 - 4, controlY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+      ctx.strokeRect(controlX - textWidth/2 - 6, controlY - textHeight/2 - 3, textWidth + 12, textHeight + 6);
       
       // Draw text
       ctx.fillStyle = '#1e40af';
       ctx.textAlign = 'center';
-      ctx.font = 'bold 11px Inter, sans-serif';
-      ctx.fillText(label, controlX, controlY + 4);
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText(label, controlX, controlY + 5);
     };
 
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const scale = 80;
+      const scale = 120; // Increased scale for better visibility
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Apply smooth rotation
-      const cos = Math.cos(rotation);
-      const sin = Math.sin(rotation);
-
-      // Prepare nodes with screen positions and radii
+      // Static positioning - no rotation
       const nodesWithPositions = data.nodes.map(node => {
-        const x = node.x * cos - node.z * sin;
-        const y = node.y;
-        const z = node.x * sin + node.z * cos;
         const radius = calculateNodeRadius(node.label);
         
         return {
           ...node,
-          screenX: centerX + x * scale,
-          screenY: centerY + y * scale,
-          z: z,
-          radius: radius + z * 2 // Subtle perspective effect
+          screenX: centerX + node.x * scale,
+          screenY: centerY + node.y * scale,
+          radius: radius
         };
       });
 
-      // Use simplified position adjustment
-      const adjustedNodes = adjustPositions(nodesWithPositions);
-
-      // Draw links
+      // Draw links first (so they appear behind nodes)
       data.links.forEach(link => {
-        const sourceNode = adjustedNodes.find(n => n.id === link.source);
-        const targetNode = adjustedNodes.find(n => n.id === link.target);
+        const sourceNode = nodesWithPositions.find(n => n.id === link.source);
+        const targetNode = nodesWithPositions.find(n => n.id === link.target);
         
         if (!sourceNode || !targetNode) return;
 
@@ -175,12 +152,12 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         const endEdgeX = endX - Math.cos(angle) * targetNode.radius;
         const endEdgeY = endY - Math.sin(angle) * targetNode.radius;
 
-        // Check if this is a shortcut property (typically A to C connection with blue color)
-        const isShortcut = link.color === '#3b82f6' || link.width === 3;
+        // Check if this is a shortcut property (blue color and width 3)
+        const isShortcut = link.color === '#3b82f6' && link.width === 3;
 
         if (isShortcut) {
           // Draw curved link for shortcut properties
-          drawCurvedLink(startEdgeX, startEdgeY, endEdgeX, endEdgeY, link.color, link.width || 3, link.label);
+          drawCurvedLink(startEdgeX, startEdgeY, endEdgeX, endEdgeY, link.color, link.width, link.label);
         } else {
           // Draw regular straight link
           ctx.beginPath();
@@ -190,7 +167,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           ctx.lineWidth = link.width || 2;
           
           if (link.style === 'dashed') {
-            ctx.setLineDash([5, 5]);
+            ctx.setLineDash([8, 6]);
           } else {
             ctx.setLineDash([]);
           }
@@ -201,72 +178,76 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           const midX = (startEdgeX + endEdgeX) / 2;
           const midY = (startEdgeY + endEdgeY) / 2;
           
-          ctx.font = '11px Inter, sans-serif';
+          ctx.font = '12px Inter, sans-serif';
           const textMetrics = ctx.measureText(link.label);
           const textWidth = textMetrics.width;
-          const textHeight = 14;
+          const textHeight = 16;
           
           // Draw text background
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.fillRect(midX - textWidth/2 - 6, midY - textHeight/2 - 3, textWidth + 12, textHeight + 6);
           
           // Draw text border
           ctx.strokeStyle = '#e5e7eb';
           ctx.lineWidth = 1;
           ctx.setLineDash([]);
-          ctx.strokeRect(midX - textWidth/2 - 4, midY - textHeight/2 - 2, textWidth + 8, textHeight + 4);
+          ctx.strokeRect(midX - textWidth/2 - 6, midY - textHeight/2 - 3, textWidth + 12, textHeight + 6);
           
           // Draw text
           ctx.fillStyle = '#374151';
           ctx.textAlign = 'center';
-          ctx.fillText(link.label, midX, midY + 4);
+          ctx.font = 'bold 12px Inter, sans-serif';
+          ctx.fillText(link.label, midX, midY + 5);
         }
       });
 
-      // Draw nodes
-      adjustedNodes.forEach(node => {
+      // Draw nodes on top
+      nodesWithPositions.forEach(node => {
         const screenX = node.screenX;
         const screenY = node.screenY;
         const radius = node.radius;
 
-        // Draw node circle with gradient
-        const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, radius);
+        // Draw node circle with enhanced gradient
+        const gradient = ctx.createRadialGradient(screenX - radius/3, screenY - radius/3, 0, screenX, screenY, radius);
         gradient.addColorStop(0, node.color);
-        gradient.addColorStop(1, node.color + 'CC'); // Add transparency at edges
+        gradient.addColorStop(0.7, node.color);
+        gradient.addColorStop(1, node.color + '80'); // More transparency at edges
         
         ctx.beginPath();
         ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
         ctx.fillStyle = gradient;
         ctx.fill();
+        
+        // Enhanced border
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         ctx.stroke();
 
-        // Add inner shadow
+        // Add subtle inner shadow
         ctx.beginPath();
-        ctx.arc(screenX, screenY, radius - 2, 0, 2 * Math.PI);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.arc(screenX, screenY, radius - 3, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Draw node label with proper sizing
+        // Draw node label with enhanced styling
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.font = 'bold 12px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 2;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 3;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
         // Handle multi-line text for long labels
         const words = node.label.split(' ');
-        if (words.length > 1 && ctx.measureText(node.label).width > radius * 1.6) {
+        if (words.length > 1 && ctx.measureText(node.label).width > radius * 1.4) {
           const line1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
           const line2 = words.slice(Math.ceil(words.length / 2)).join(' ');
-          ctx.fillText(line1, screenX, screenY - 3);
-          ctx.fillText(line2, screenX, screenY + 9);
+          ctx.fillText(line1, screenX, screenY - 4);
+          ctx.fillText(line2, screenX, screenY + 12);
         } else {
-          ctx.fillText(node.label, screenX, screenY + 3);
+          ctx.fillText(node.label, screenX, screenY + 4);
         }
         
         // Reset shadow
@@ -275,18 +256,21 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
       });
-
-      rotation += 0.006; // Smooth rotation speed
-      animationRef.current = requestAnimationFrame(draw);
     };
 
+    // Draw once - no animation loop
     draw();
 
+    // Redraw on resize
+    const handleResize = () => {
+      resizeCanvas();
+      draw();
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      window.removeEventListener('resize', handleResize);
     };
   }, [data]);
 
@@ -294,7 +278,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
     <canvas
       ref={canvasRef}
       className="w-full h-full rounded-lg"
-      style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' }}
     />
   );
 };
