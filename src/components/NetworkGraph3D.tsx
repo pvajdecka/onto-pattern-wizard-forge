@@ -85,10 +85,10 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
 
     // Function to calculate optimal node radius based on text lines
     const calculateNodeRadius = (text: string) => {
-      const maxLineWidth = 130; // Maximum width for text within circle
+      const maxLineWidth = 120;
       const lines = splitTextIntoLines(text, maxLineWidth);
       const lineHeight = 16;
-      const padding = 30;
+      const padding = 25;
       
       // Calculate radius based on text dimensions
       const textHeight = lines.length * lineHeight;
@@ -100,46 +100,62 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       const radiusForWidth = (maxTextWidth / 2) + padding;
       const radiusForHeight = (textHeight / 2) + padding;
       
-      return Math.max(radiusForWidth, radiusForHeight, 45);
+      return Math.max(radiusForWidth, radiusForHeight, 50);
     };
 
     const draw = () => {
       const rect = canvas.getBoundingClientRect();
+      
+      // Add margins to ensure complete graph fits
+      const margin = 80;
+      const usableWidth = rect.width - (margin * 2);
+      const usableHeight = rect.height - (margin * 2);
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      
-      // Dynamically adjust scale and spacing based on canvas size
-      const baseScale = Math.min(rect.width, rect.height) / 10;
-      const scale = Math.max(baseScale, 80);
-      const nodeSpacing = scale * 1.8; // Increased spacing between nodes
 
       ctx.clearRect(0, 0, rect.width, rect.height);
 
       // Check if we have a shortcut link (generated result)
       const hasShortcut = data.links.some(link => link.width && link.width > 2);
 
-      // Calculate node positions with better spacing
+      // Calculate maximum node radius to adjust spacing
+      const maxRadius = Math.max(...data.nodes.map(node => calculateNodeRadius(node.label)));
+      
+      // Dynamic spacing based on container size and max radius
+      const baseSpacing = Math.min(usableWidth, usableHeight) / 4;
+      const nodeSpacing = Math.max(baseSpacing, maxRadius * 2.5);
+
+      // Calculate node positions with safe bounds
       const nodesWithPositions = data.nodes.map((node, index) => {
         const radius = calculateNodeRadius(node.label);
         let screenX, screenY;
 
         if (hasShortcut) {
-          // When shortcut is generated, arrange nodes in a triangle with more space
+          // Triangle layout for shortcut pattern
           if (index === 0) { // Class A - left
-            screenX = centerX - nodeSpacing;
+            screenX = centerX - nodeSpacing * 0.8;
             screenY = centerY;
           } else if (index === 1) { // Class B - top center
             screenX = centerX;
-            screenY = centerY - nodeSpacing * 0.8;
-          } else { // Class C - right
-            screenX = centerX + nodeSpacing;
+            screenY = centerY - nodeSpacing * 0.6;
+          } else if (index === 2) { // Class C - right
+            screenX = centerX + nodeSpacing * 0.8;
             screenY = centerY;
+          } else { // New class - bottom
+            screenX = centerX;
+            screenY = centerY + nodeSpacing * 0.8;
           }
         } else {
-          // Normal horizontal layout with increased spacing
-          screenX = centerX + (node.x * nodeSpacing);
-          screenY = centerY + (node.y * nodeSpacing * 0.3); // Slight vertical offset
+          // Horizontal layout for normal pattern
+          const totalNodes = data.nodes.length;
+          const startX = centerX - ((totalNodes - 1) * nodeSpacing) / 2;
+          screenX = startX + (index * nodeSpacing);
+          screenY = centerY + (node.y * nodeSpacing * 0.2);
         }
+        
+        // Ensure nodes stay within bounds
+        screenX = Math.max(margin + radius, Math.min(rect.width - margin - radius, screenX));
+        screenY = Math.max(margin + radius, Math.min(rect.height - margin - radius, screenY));
         
         return {
           ...node,
@@ -150,7 +166,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         };
       });
 
-      // Draw links with better label positioning
+      // Draw links with improved positioning to avoid intersections
       data.links.forEach(link => {
         const sourceNode = nodesWithPositions.find(n => n.id === link.source);
         const targetNode = nodesWithPositions.find(n => n.id === link.target);
@@ -178,7 +194,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           // Draw curved shortcut link
           const midX = (startEdgeX + endEdgeX) / 2;
           const midY = (startEdgeY + endEdgeY) / 2;
-          const controlY = midY - 60; // Curve upward
+          const controlY = midY - 80; // Curve upward more
           
           ctx.moveTo(startEdgeX, startEdgeY);
           ctx.quadraticCurveTo(midX, controlY, endEdgeX, endEdgeY);
@@ -198,35 +214,46 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         
         ctx.stroke();
 
-        // Position link labels to avoid intersections
+        // Calculate label position to avoid all intersections
         let labelX, labelY;
         
         if (isShortcut) {
-          // Position shortcut label above the curved line
+          // Position shortcut label above the curved line with more clearance
           labelX = (startEdgeX + endEdgeX) / 2;
-          labelY = ((startEdgeY + endEdgeY) / 2) - 70;
+          labelY = ((startEdgeY + endEdgeY) / 2) - 100;
         } else {
-          // Position regular labels with offset to avoid circles
+          // Position regular labels with smart offset calculation
           const midX = (startEdgeX + endEdgeX) / 2;
           const midY = (startEdgeY + endEdgeY) / 2;
           
-          // Calculate perpendicular offset to move label away from line
+          // Calculate perpendicular offset based on line direction
           const perpAngle = angle + Math.PI / 2;
-          const offsetDistance = 25;
+          let offsetDistance = 40;
+          
+          // Adjust offset direction to avoid nodes
+          const toCenter = Math.atan2(centerY - midY, centerX - midX);
+          const angleDiff = Math.abs(perpAngle - toCenter);
+          if (angleDiff > Math.PI / 2) {
+            offsetDistance = -offsetDistance;
+          }
           
           labelX = midX + Math.cos(perpAngle) * offsetDistance;
           labelY = midY + Math.sin(perpAngle) * offsetDistance;
+          
+          // Ensure label stays within bounds
+          labelX = Math.max(margin + 50, Math.min(rect.width - margin - 50, labelX));
+          labelY = Math.max(margin + 20, Math.min(rect.height - margin - 20, labelY));
         }
         
         // Draw link label with enhanced background
-        ctx.font = '12px Inter, sans-serif';
+        ctx.font = '11px Inter, sans-serif';
         const textMetrics = ctx.measureText(link.label);
         const textWidth = textMetrics.width;
-        const textHeight = 16;
+        const textHeight = 14;
         
         // Draw text background with padding
-        const bgPadding = 8;
-        ctx.fillStyle = isShortcut ? 'rgba(59, 130, 246, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+        const bgPadding = 6;
+        ctx.fillStyle = isShortcut ? 'rgba(59, 130, 246, 0.95)' : 'rgba(255, 255, 255, 0.98)';
         ctx.fillRect(
           labelX - textWidth/2 - bgPadding, 
           labelY - textHeight/2 - bgPadding/2, 
@@ -235,7 +262,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         );
         
         // Draw text border
-        ctx.strokeStyle = isShortcut ? '#3b82f6' : '#e5e7eb';
+        ctx.strokeStyle = isShortcut ? '#3b82f6' : '#d1d5db';
         ctx.lineWidth = 1;
         ctx.setLineDash([]);
         ctx.strokeRect(
@@ -248,7 +275,7 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         // Draw text
         ctx.fillStyle = isShortcut ? '#ffffff' : '#374151';
         ctx.textAlign = 'center';
-        ctx.fillText(link.label, labelX, labelY + 4);
+        ctx.fillText(link.label, labelX, labelY + 3);
       });
 
       // Draw nodes with multi-line text
@@ -268,13 +295,13 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.fillStyle = gradient;
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         // Add subtle inner shadow
         ctx.beginPath();
-        ctx.arc(screenX, screenY, radius - 4, 0, 2 * Math.PI);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.arc(screenX, screenY, radius - 3, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -282,12 +309,12 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 12px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 3;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
-        const maxLineWidth = radius * 1.7;
+        const maxLineWidth = radius * 1.6;
         const lines = splitTextIntoLines(node.label, maxLineWidth);
         const lineHeight = 16;
         const totalTextHeight = lines.length * lineHeight;
