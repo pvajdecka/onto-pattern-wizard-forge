@@ -129,10 +129,65 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
     }
   ];
 
+  // Preloaded data for subclass pattern
+  const preloadedSubclassData = [
+    {
+      A_label: 'Data Creation',
+      p_label: 'used',
+      B_label: 'Data Item',
+      C_label: 'Creation Guideline',
+      Subclass: 'Guideline-Based Data Creation'
+    },
+    {
+      A_label: 'Ornamental Motif',
+      p_label: 'is ornamental motif of',
+      B_label: 'Iconographic or Decorative Apparatus',
+      C_label: 'Iconographic Apparatus',
+      Subclass: 'Iconographic Ornamental Motif'
+    },
+    {
+      A_label: 'Game control interface',
+      p_label: 'GUI Control Interface',
+      B_label: 'GUI Component',
+      C_label: 'Scroll bar',
+      Subclass: 'Game control interface with Scroll bar'
+    },
+    {
+      A_label: 'User Account',
+      p_label: 'subscriber of',
+      B_label: 'Container',
+      C_label: 'Forum',
+      Subclass: 'Forum Subscriber Account'
+    },
+    {
+      A_label: 'Step',
+      p_label: 'activates',
+      B_label: 'Action',
+      C_label: 'Task',
+      Subclass: 'Task-Activating Step'
+    },
+    {
+      A_label: 'Competition',
+      p_label: 'has acknowledgment',
+      B_label: 'acknowledgment',
+      C_label: 'award',
+      Subclass: 'Competition with award'
+    },
+    {
+      A_label: 'Resource',
+      p_label: 'managed by',
+      B_label: 'Participant',
+      C_label: 'Provider',
+      Subclass: 'Provider-Managed Resource'
+    }
+  ];
+
   // Load preloaded data when pattern changes
   useEffect(() => {
     if (pattern === 'shortcut') {
       setCsvData(preloadedShortcutData);
+    } else if (pattern === 'subclass') {
+      setCsvData(preloadedSubclassData);
     } else {
       setCsvData([]);
     }
@@ -203,7 +258,8 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
           <div className="mt-4">
             <p className="text-sm font-medium text-amber-700 mb-2">
               Currently {csvData.length} few-shot examples loaded
-              {pattern === 'shortcut' && csvData === preloadedShortcutData && ' (preloaded)'}
+              {((pattern === 'shortcut' && csvData === preloadedShortcutData) || 
+                (pattern === 'subclass' && csvData === preloadedSubclassData)) && ' (preloaded)'}
             </p>
             <ScrollArea className="h-64 bg-white rounded border border-amber-200">
               <Table>
