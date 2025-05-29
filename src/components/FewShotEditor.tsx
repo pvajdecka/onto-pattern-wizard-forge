@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { preloadedShortcutData, preloadedSubclassData } from '@/data/fewShotExamples';
-import { parseCsvData } from '@/utils/csvParser';
+import { validateCsvColumns } from '@/utils/csvParser';
 import { FewShotExamplesTable } from './FewShotExamplesTable';
 import { FewShotFileUpload } from './FewShotFileUpload';
 
@@ -37,12 +37,21 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      const data = parseCsvData(text);
+      const validation = validateCsvColumns(text, requiredColumns);
       
-      setCsvData(data);
+      if (!validation.isValid) {
+        toast({
+          title: "Invalid CSV Format",
+          description: `${validation.message}. Please ensure your CSV has the following required columns: ${requiredColumns.join(', ')}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setCsvData(validation.data);
       toast({
         title: "CSV Uploaded",
-        description: `Loaded ${data.length} examples for ${pattern} pattern`,
+        description: `Loaded ${validation.data.length} examples for ${pattern} pattern`,
       });
     };
     reader.readAsText(file);
