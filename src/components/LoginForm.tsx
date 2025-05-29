@@ -44,22 +44,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         </div>
       </div>
       
-      <div className="w-full max-w-md space-y-8 relative z-10">
-        {/* Header with logos */}
-        <div className="text-center space-y-6">
-          <div className="flex justify-center space-x-8 mb-8 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div className="w-full max-w-md space-y-4 relative z-10">
+        {/* Header with logos - moved higher */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center space-x-8 mb-4 p-4 bg-white rounded-2xl">
             <img 
               src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
               alt="ONTO-DESIDE Logo" 
-              className="h-16 object-contain"
+              className="h-12 object-contain opacity-80"
             />
             <img 
               src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
               alt="VSE Faculty Logo" 
-              className="h-16 object-contain"
+              className="h-12 object-contain opacity-80"
             />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-700 to-blue-700 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-700 to-green-700 bg-clip-text text-transparent">
             Welcome Back
           </h1>
           <p className="text-slate-600 text-lg">
@@ -87,7 +87,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
                     placeholder="Enter your username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                    className="pl-10 border-slate-200 focus:border-green-400 focus:ring-green-400"
                     required
                   />
                 </div>
@@ -105,7 +105,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
+                    className="pl-10 border-slate-200 focus:border-green-400 focus:ring-green-400"
                     required
                   />
                 </div>
@@ -113,7 +113,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-slate-600 to-blue-600 hover:from-slate-700 hover:to-blue-700 text-white font-medium py-2.5 transition-all duration-300 transform hover:scale-105"
+                className="w-full bg-gradient-to-r from-slate-600 to-green-600 hover:from-slate-700 hover:to-green-700 text-white font-medium py-2.5 transition-all duration-300 transform hover:scale-105"
                 disabled={isLoading}
               >
                 {isLoading ? (
