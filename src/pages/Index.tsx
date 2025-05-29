@@ -38,7 +38,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-green-50 to-emerald-50">
-        <Sidebar />
+        <AppSidebar />
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
