@@ -1,7 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Upload, FileText } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -204,35 +205,30 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern }) => {
               Currently {csvData.length} few-shot examples loaded
               {pattern === 'shortcut' && csvData === preloadedShortcutData && ' (preloaded)'}
             </p>
-            <div className="max-h-32 overflow-y-auto bg-white rounded border border-amber-200">
-              <table className="w-full text-xs">
-                <thead className="bg-amber-100">
-                  <tr>
+            <ScrollArea className="h-64 bg-white rounded border border-amber-200">
+              <Table>
+                <TableHeader className="bg-amber-100">
+                  <TableRow>
                     {requiredColumns.map(col => (
-                      <th key={col} className="p-2 text-left font-medium text-amber-800">
+                      <TableHead key={col} className="font-medium text-amber-800">
                         {col}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {csvData.slice(0, 3).map((row, index) => (
-                    <tr key={index} className="border-t border-amber-200">
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {csvData.map((row, index) => (
+                    <TableRow key={index} className="border-amber-200">
                       {requiredColumns.map(col => (
-                        <td key={col} className="p-2 text-gray-700">
+                        <TableCell key={col} className="text-gray-700">
                           {row[col] || '-'}
-                        </td>
+                        </TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-            {csvData.length > 3 && (
-              <p className="text-xs text-gray-500 mt-1">
-                Showing first 3 of {csvData.length} examples
-              </p>
-            )}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </div>
         )}
       </CardContent>
