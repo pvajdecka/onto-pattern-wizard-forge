@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -89,15 +90,6 @@ Create a direct property that connects ${classA} to ${classC} via the property c
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
-                  <Input
-                    value={classA}
-                    onChange={(e) => setClassA(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter class A label"
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Property p Label</Label>
                   <Input
                     value={propertyP}
@@ -107,21 +99,30 @@ Create a direct property that connects ${classA} to ${classC} via the property c
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Class B Label</Label>
-                  <Input
-                    value={classB}
-                    onChange={(e) => setClassB(e.target.value)}
-                    className="border-green-200 focus:border-green-400"
-                    placeholder="Enter class B label"
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Property r Label</Label>
                   <Input
                     value={propertyR}
                     onChange={(e) => setPropertyR(e.target.value)}
                     className="border-green-200 focus:border-green-400"
                     placeholder="Enter property r label"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
+                  <Input
+                    value={classA}
+                    onChange={(e) => setClassA(e.target.value)}
+                    className="border-green-200 focus:border-green-400"
+                    placeholder="Enter class A label"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Class B Label</Label>
+                  <Input
+                    value={classB}
+                    onChange={(e) => setClassB(e.target.value)}
+                    className="border-green-200 focus:border-green-400"
+                    placeholder="Enter class B label"
                   />
                 </div>
                 <div className="space-y-2 col-span-2">
