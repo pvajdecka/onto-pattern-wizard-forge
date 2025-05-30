@@ -109,6 +109,7 @@ const Index = () => {
   };
 
   const handleModelParametersChange = (params: typeof modelParams) => {
+    console.log('Model parameters changed in Index:', params);
     setModelParams(params);
   };
 
@@ -165,7 +166,10 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-green-50 to-emerald-50">
-        <AppSidebar />
+        <AppSidebar 
+          modelParams={modelParams}
+          onParametersChange={handleModelParametersChange}
+        />
         <SidebarInset>
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
