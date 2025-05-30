@@ -184,14 +184,19 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             <p className="text-sm text-gray-500">{session.time}</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 flex-wrap">
-                          <Badge variant="secondary" className="bg-green-100 text-green-700">
-                            {session.model_name}
-                          </Badge>
+                        <div className="flex flex-col items-end space-y-2">
+                          <div className="flex items-center space-x-2">
+                            {session.use_few_shot && (
+                              <Badge variant="secondary" className="bg-amber-100 text-amber-700">
+                                few-shot
+                              </Badge>
+                            )}
+                          </div>
                           
-                          {/* Model Parameters Section */}
-                          <div className="ml-4 text-xs text-gray-600 space-y-1 border-l border-gray-200 pl-4">
-                            <div className="flex space-x-4">
+                          {/* Model Parameters Section - Vertical Layout */}
+                          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-700 border border-gray-200">
+                            <div className="font-semibold text-gray-800 mb-2">{session.model_name}</div>
+                            <div className="space-y-1">
                               <div>
                                 <span className="font-medium">Temperature:</span>
                                 <span className="ml-1">{session.temperature}</span>
@@ -200,8 +205,6 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                                 <span className="font-medium">Top-p:</span>
                                 <span className="ml-1">{session.top_p}</span>
                               </div>
-                            </div>
-                            <div className="flex space-x-4">
                               <div>
                                 <span className="font-medium">Frequency Penalty:</span>
                                 <span className="ml-1">{session.frequency_penalty}</span>
@@ -212,12 +215,6 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                               </div>
                             </div>
                           </div>
-                          
-                          {session.use_few_shot && (
-                            <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-                              few-shot
-                            </Badge>
-                          )}
                         </div>
                       </div>
 
