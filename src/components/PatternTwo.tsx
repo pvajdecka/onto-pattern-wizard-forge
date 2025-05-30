@@ -26,8 +26,21 @@ export const PatternTwo = () => {
       p_label: propertyP,
       B_label: classB,
       C_label: classC,
+      model_name: "gpt-4o",
       use_few_shot: useFewShot,
-      few_shot_examples: useFewShot ? fewShotData : []
+      few_shot_examples: useFewShot ? fewShotData.map(row => ({
+        A_label: row.A_label || row['?A_label'] || '',
+        p_label: row.p_label || row['?p_label'] || '',
+        B_label: row.B_label || row['?B_label'] || '',
+        C_label: row.C_label || row['?C_label'] || '',
+        Subclass: row.Subclass || '',
+        Human: row.Human || ''
+      })) : [],
+      temperature: 0.0,
+      top_p: 1.0,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      repeat_penalty: 1.1
     };
     return basePayload;
   };

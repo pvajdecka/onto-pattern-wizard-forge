@@ -28,8 +28,21 @@ export const PatternOne = () => {
       B_label: classB,
       r_label: propertyR,
       C_label: classC,
+      model_name: "gpt-4o",
       use_few_shot: useFewShot,
-      few_shot_examples: useFewShot ? fewShotData : []
+      few_shot_examples: useFewShot ? fewShotData.map(row => ({
+        A_label: row.A_label || row['?A_label'] || '',
+        p_label: row.p_label || row['?p_label'] || '',
+        B_label: row.B_label || row['?B_label'] || '',
+        r_label: row.r_label || row['?r_label'] || '',
+        C_label: row.C_label || row['?C_label'] || '',
+        Property: row.Property || ''
+      })) : [],
+      temperature: 0.0,
+      top_p: 1.0,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
+      repeat_penalty: 1.1
     };
     return basePayload;
   };
