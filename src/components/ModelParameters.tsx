@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { clearSessionHistory } from '@/utils/sessionStorage';
+import { API_CONFIG } from '@/config/api';
 
 interface ModelParametersProps {
   onParametersChange?: (params: {
@@ -42,7 +42,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
   // Use the specified backend URL
-  const BACKEND_URL = 'http://127.0.0.1:8000';
+  const BACKEND_URL = API_CONFIG.BACKEND_URL;
 
   // Fetch available models from backend
   useEffect(() => {
