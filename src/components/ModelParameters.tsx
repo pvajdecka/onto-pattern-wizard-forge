@@ -41,16 +41,20 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Use the specified backend URL
-  const BACKEND_URL = 'http://127.0.0.1:8000';
+  // Dynamic backend URL that works from any computer
+  const getBackendUrl = () => {
+    // Use the current hostname but with port 8000
+    return `http://${window.location.hostname}:8000`;
+  };
 
   // Fetch available models from backend
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        console.log('Fetching models from:', BACKEND_URL);
+        const backendUrl = getBackendUrl();
+        console.log('Fetching models from:', backendUrl);
         
-        const response = await fetch(`${BACKEND_URL}/model_provider_map`, {
+        const response = await fetch(`${backendUrl}/model_provider_map`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
