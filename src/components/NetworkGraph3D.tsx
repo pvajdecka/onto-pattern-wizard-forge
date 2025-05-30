@@ -61,7 +61,22 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       return Math.min(minRadius, 60); // Cap at 60px
     };
 
-    // Function to draw curved line for shortcut properties
+    // Function to draw arrowhead
+    const drawArrowhead = (x: number, y: number, angle: number, color: string, size: number = 8) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-size, -size/2);
+      ctx.lineTo(-size, size/2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Function to draw curved line for shortcut properties with arrow
     const drawCurvedLink = (startX: number, startY: number, endX: number, endY: number, color: string, width: number, label: string) => {
       // Calculate control point for curve (arc outward)
       const midX = (startX + endX) / 2;
@@ -91,6 +106,15 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
       ctx.lineWidth = width;
       ctx.setLineDash([]);
       ctx.stroke();
+
+      // Calculate angle for arrowhead at the end of curve
+      const t = 0.95; // Position near the end for arrow calculation
+      const curveEndX = (1-t)*(1-t)*startX + 2*(1-t)*t*controlX + t*t*endX;
+      const curveEndY = (1-t)*(1-t)*startY + 2*(1-t)*t*controlY + t*t*endY;
+      const arrowAngle = Math.atan2(endY - curveEndY, endX - curveEndX);
+      
+      // Draw arrowhead
+      drawArrowhead(endX, endY, arrowAngle, color, 10);
 
       // Draw label at the curve's peak
       ctx.font = '11px Inter, sans-serif';
@@ -174,6 +198,9 @@ export const NetworkGraph3D: React.FC<NetworkGraph3DProps> = ({ data }) => {
           }
           
           ctx.stroke();
+
+          // Draw arrowhead for straight links
+          drawArrowhead(endEdgeX, endEdgeY, angle, link.color, 8);
 
           // Draw label with background for regular links
           const midX = (startEdgeX + endEdgeX) / 2;
