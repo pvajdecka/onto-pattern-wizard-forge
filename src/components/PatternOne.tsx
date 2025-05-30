@@ -60,6 +60,12 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     }
   }, [initialData]);
 
+  // Reset results when any input field changes
+  useEffect(() => {
+    setResult(null);
+    setPrompt(null);
+  }, [classA, classB, classC, propertyP, propertyR]);
+
   // Notify parent of changes
   useEffect(() => {
     if (onDataChange) {
