@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { clearSessionHistory } from '@/utils/sessionStorage';
+import { API_CONFIG } from '@/config/api';
 
 interface ModelParametersProps {
   onParametersChange?: (params: {
@@ -41,20 +41,16 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Dynamic backend URL that works from any computer
-  const getBackendUrl = () => {
-    // Use the current hostname but with port 8000
-    return `http://${window.location.hostname}:8000`;
-  };
+  // Use the specified backend URL
+  const BACKEND_URL = API_CONFIG.BACKEND_URL;
 
   // Fetch available models from backend
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const backendUrl = getBackendUrl();
-        console.log('Fetching models from:', backendUrl);
+        console.log('Fetching models from:', BACKEND_URL);
         
-        const response = await fetch(`${backendUrl}/model_provider_map`, {
+        const response = await fetch(`${BACKEND_URL}/model_provider_map`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

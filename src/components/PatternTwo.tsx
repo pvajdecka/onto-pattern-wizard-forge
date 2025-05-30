@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { NetworkGraph3D } from '@/components/NetworkGraph3D';
 import { FewShotEditor } from '@/components/FewShotEditor';
 import { saveSessionData, getIsoTime } from '@/utils/sessionStorage';
+import { API_CONFIG } from '@/config/api';
 
 interface PatternTwoProps {
   initialData?: {
@@ -105,9 +105,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/generate_subclass with payload:', payload);
+      console.log('Calling API with payload:', payload);
       
-      const response = await fetch('http://localhost:8000/generate_subclass', {
+      const response = await fetch(`${API_CONFIG.BACKEND_URL}/generate_subclass`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,9 +153,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/subclass_prompt with payload:', payload);
+      console.log('Calling API with payload:', payload);
       
-      const response = await fetch('http://localhost:8000/subclass_prompt', {
+      const response = await fetch(`${API_CONFIG.BACKEND_URL}/subclass_prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

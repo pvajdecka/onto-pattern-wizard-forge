@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { NetworkGraph3D } from '@/components/NetworkGraph3D';
 import { FewShotEditor } from '@/components/FewShotEditor';
 import { saveSessionData, getIsoTime } from '@/utils/sessionStorage';
+import { API_CONFIG } from '@/config/api';
 
 interface PatternOneProps {
   initialData?: {
@@ -109,9 +110,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/generate_shortcut with payload:', payload);
+      console.log('Calling API with payload:', payload);
       
-      const response = await fetch('http://localhost:8000/generate_shortcut', {
+      const response = await fetch(`${API_CONFIG.BACKEND_URL}/generate_shortcut`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,9 +158,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/shortcut_prompt with payload:', payload);
+      console.log('Calling API with payload:', payload);
       
-      const response = await fetch('http://localhost:8000/shortcut_prompt', {
+      const response = await fetch(`${API_CONFIG.BACKEND_URL}/shortcut_prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
