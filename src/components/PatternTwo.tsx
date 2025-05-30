@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,6 +73,12 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, useFewShot, result, prompt, fewShotData, onDataChange]);
 
+  // Get the backend URL
+  const getBackendUrl = () => {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:8000`;
+  };
+
   const buildPayload = () => {
     const basePayload = {
       A_label: classA,
@@ -105,9 +110,10 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/generate_subclass with payload:', payload);
+      const backendUrl = getBackendUrl();
+      console.log(`Calling ${backendUrl}/generate_subclass with payload:`, payload);
       
-      const response = await fetch('http://localhost:8000/generate_subclass', {
+      const response = await fetch(`${backendUrl}/generate_subclass`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,9 +159,10 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/subclass_prompt with payload:', payload);
+      const backendUrl = getBackendUrl();
+      console.log(`Calling ${backendUrl}/subclass_prompt with payload:`, payload);
       
-      const response = await fetch('http://localhost:8000/subclass_prompt', {
+      const response = await fetch(`${backendUrl}/subclass_prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

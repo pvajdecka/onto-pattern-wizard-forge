@@ -77,6 +77,12 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, propertyR, useFewShot, result, prompt, fewShotData, onDataChange]);
 
+  // Get the backend URL
+  const getBackendUrl = () => {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:8000`;
+  };
+
   const buildPayload = () => {
     const basePayload = {
       A_label: classA,
@@ -109,9 +115,10 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/generate_shortcut with payload:', payload);
+      const backendUrl = getBackendUrl();
+      console.log(`Calling ${backendUrl}/generate_shortcut with payload:`, payload);
       
-      const response = await fetch('http://localhost:8000/generate_shortcut', {
+      const response = await fetch(`${backendUrl}/generate_shortcut`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,9 +164,10 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      console.log('Calling http://localhost:8000/shortcut_prompt with payload:', payload);
+      const backendUrl = getBackendUrl();
+      console.log(`Calling ${backendUrl}/shortcut_prompt with payload:`, payload);
       
-      const response = await fetch('http://localhost:8000/shortcut_prompt', {
+      const response = await fetch(`${backendUrl}/shortcut_prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

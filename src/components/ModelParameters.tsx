@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -41,8 +40,15 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Use the specified backend URL
-  const BACKEND_URL = 'http://127.0.0.1:8000';
+  // Get the actual server hostname from environment or use the current hostname with port 8000
+  const getBackendUrl = () => {
+    // If we're on localhost, use localhost:8000
+    // Otherwise, use the current hostname with port 8000
+    const hostname = window.location.hostname;
+    return `http://${hostname}:8000`;
+  };
+
+  const BACKEND_URL = getBackendUrl();
 
   // Fetch available models from backend
   useEffect(() => {
@@ -103,7 +109,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
     };
 
     fetchModels();
-  }, [initialParams?.modelName]);
+  }, [initialParams?.modelName, BACKEND_URL]);
 
   // Update state when initialParams change - but only once to avoid loops
   useEffect(() => {
