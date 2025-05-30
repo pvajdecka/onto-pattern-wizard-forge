@@ -73,15 +73,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, useFewShot, result, prompt, fewShotData, onDataChange]);
 
-  // Get the backend URL
+  // Always use 127.0.0.1:8000 since backend and frontend are on the same server
   const getBackendUrl = () => {
-    const hostname = window.location.hostname;
-    // If hostname is localhost or 127.0.0.1, use 127.0.0.1 for consistency
-    // Otherwise use the actual hostname (for remote access)
-    const backendHost = (hostname === 'localhost' || hostname === '127.0.0.1') 
-      ? '127.0.0.1' 
-      : hostname;
-    return `http://${backendHost}:8000`;
+    return 'http://127.0.0.1:8000';
   };
 
   const buildPayload = () => {
