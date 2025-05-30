@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -26,7 +26,7 @@ interface ModelParametersProps {
   };
 }
 
-export const ModelParameters: React.FC<ModelParametersProps> = ({ 
+export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({ 
   onParametersChange, 
   initialParams 
 }) => {
@@ -87,35 +87,76 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
     fetchModels();
   }, [initialParams?.modelName]);
 
-  // Update state when initialParams change
+  // Update state when initialParams change - but only once to avoid loops
   useEffect(() => {
     if (initialParams) {
-      if (initialParams.modelName) setModelName(initialParams.modelName);
-      if (initialParams.temperature !== undefined) setTemperature([initialParams.temperature]);
-      if (initialParams.topP !== undefined) setTopP([initialParams.topP]);
-      if (initialParams.frequencyPenalty !== undefined) setFrequencyPenalty([initialParams.frequencyPenalty]);
-      if (initialParams.presencePenalty !== undefined) setPresencePenalty([initialParams.presencePenalty]);
-      if (initialParams.repeatPenalty !== undefined) setRepeatPenalty([initialParams.repeatPenalty]);
+      if (initialParams.modelName && initialParams.modelName !== modelName) {
+        setModelName(initialParams.modelName);
+      }
+      if (initialParams.temperature !== undefined && initialParams.temperature !== temperature[0]) {
+        setTemperature([initialParams.temperature]);
+      }
+      if (initialParams.topP !== undefined && initialParams.topP !== topP[0]) {
+        setTopP([initialParams.topP]);
+      }
+      if (initialParams.frequencyPenalty !== undefined && initialParams.frequencyPenalty !== frequencyPenalty[0]) {
+        setFrequencyPenalty([initialParams.frequencyPenalty]);
+      }
+      if (initialParams.presencePenalty !== undefined && initialParams.presencePenalty !== presencePenalty[0]) {
+        setPresencePenalty([initialParams.presencePenalty]);
+      }
+      if (initialParams.repeatPenalty !== undefined && initialParams.repeatPenalty !== repeatPenalty[0]) {
+        setRepeatPenalty([initialParams.repeatPenalty]);
+      }
     }
   }, [initialParams]);
 
   const provider = modelProviderMap[modelName] || 'openai';
 
-  // Notify parent component when parameters change
+  // Memoized callbacks to prevent re-renders
+  const handleTemperatureChange = useCallback((value: number[]) => {
+    setTemperature(value);
+  }, []);
+
+  const handleTopPChange = useCallback((value: number[]) => {
+    setTopP(value);
+  }, []);
+
+  const handleFrequencyPenaltyChange = useCallback((value: number[]) => {
+    setFrequencyPenalty(value);
+  }, []);
+
+  const handlePresencePenaltyChange = useCallback((value: number[]) => {
+    setPresencePenalty(value);
+  }, []);
+
+  const handleRepeatPenaltyChange = useCallback((value: number[]) => {
+    setRepeatPenalty(value);
+  }, []);
+
+  const handleModelChange = useCallback((value: string) => {
+    setModelName(value);
+  }, []);
+
+  // Notify parent component when parameters change - debounced
   useEffect(() => {
-    if (onParametersChange) {
-      onParametersChange({
-        modelName,
-        temperature: temperature[0],
-        topP: topP[0],
-        frequencyPenalty: frequencyPenalty[0],
-        presencePenalty: presencePenalty[0],
-        repeatPenalty: repeatPenalty[0]
-      });
-    }
+    const timeoutId = setTimeout(() => {
+      if (onParametersChange) {
+        onParametersChange({
+          modelName,
+          temperature: temperature[0],
+          topP: topP[0],
+          frequencyPenalty: frequencyPenalty[0],
+          presencePenalty: presencePenalty[0],
+          repeatPenalty: repeatPenalty[0]
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [modelName, temperature, topP, frequencyPenalty, presencePenalty, repeatPenalty, onParametersChange]);
 
-  const getProviderBadgeColor = (provider: string) => {
+  const getProviderBadgeColor = useCallback((provider: string) => {
     switch (provider) {
       case 'openai':
         return 'bg-blue-100 text-blue-700';
@@ -124,9 +165,9 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
       default:
         return 'bg-gray-100 text-gray-700';
     }
-  };
+  }, []);
 
-  const getProviderDisplayName = (provider: string) => {
+  const getProviderDisplayName = useCallback((provider: string) => {
     switch (provider) {
       case 'openai':
         return 'OpenAI';
@@ -135,7 +176,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
       default:
         return provider;
     }
-  };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -143,7 +184,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
         <Label className="text-sm font-medium text-gray-700">Model Selection</Label>
         <Select 
           value={modelName} 
-          onValueChange={setModelName}
+          onValueChange={handleModelChange}
           disabled={isLoadingModels}
         >
           <SelectTrigger className="border-green-200 focus:border-green-400">
@@ -171,11 +212,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <Label className="text-sm font-medium text-gray-700">Temperature</Label>
-            <span className="text-sm text-green-600 font-mono">{temperature[0]}</span>
+            <span className="text-sm text-green-600 font-mono">{temperature[0].toFixed(1)}</span>
           </div>
           <Slider
             value={temperature}
-            onValueChange={setTemperature}
+            onValueChange={handleTemperatureChange}
             max={2.0}
             min={0.0}
             step={0.1}
@@ -186,11 +227,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <Label className="text-sm font-medium text-gray-700">Top-p</Label>
-            <span className="text-sm text-green-600 font-mono">{topP[0]}</span>
+            <span className="text-sm text-green-600 font-mono">{topP[0].toFixed(2)}</span>
           </div>
           <Slider
             value={topP}
-            onValueChange={setTopP}
+            onValueChange={handleTopPChange}
             max={1.0}
             min={0.0}
             step={0.05}
@@ -203,11 +244,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <Label className="text-sm font-medium text-gray-700">Frequency Penalty</Label>
-                <span className="text-sm text-green-600 font-mono">{frequencyPenalty[0]}</span>
+                <span className="text-sm text-green-600 font-mono">{frequencyPenalty[0].toFixed(1)}</span>
               </div>
               <Slider
                 value={frequencyPenalty}
-                onValueChange={setFrequencyPenalty}
+                onValueChange={handleFrequencyPenaltyChange}
                 max={2.0}
                 min={0.0}
                 step={0.1}
@@ -218,11 +259,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <Label className="text-sm font-medium text-gray-700">Presence Penalty</Label>
-                <span className="text-sm text-green-600 font-mono">{presencePenalty[0]}</span>
+                <span className="text-sm text-green-600 font-mono">{presencePenalty[0].toFixed(1)}</span>
               </div>
               <Slider
                 value={presencePenalty}
-                onValueChange={setPresencePenalty}
+                onValueChange={handlePresencePenaltyChange}
                 max={2.0}
                 min={0.0}
                 step={0.1}
@@ -236,11 +277,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <Label className="text-sm font-medium text-gray-700">Repeat Penalty</Label>
-              <span className="text-sm text-green-600 font-mono">{repeatPenalty[0]}</span>
+              <span className="text-sm text-green-600 font-mono">{repeatPenalty[0].toFixed(1)}</span>
             </div>
             <Slider
               value={repeatPenalty}
-              onValueChange={setRepeatPenalty}
+              onValueChange={handleRepeatPenaltyChange}
               max={2.0}
               min={0.0}
               step={0.1}
@@ -251,4 +292,6 @@ export const ModelParameters: React.FC<ModelParametersProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ModelParameters.displayName = 'ModelParameters';
