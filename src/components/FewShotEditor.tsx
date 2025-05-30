@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -16,12 +16,15 @@ interface FewShotEditorProps {
 export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern, onDataChange }) => {
   const [csvData, setCsvData] = useState<any[]>([]);
 
-  const requiredColumns = pattern === 'shortcut' 
-    ? ['?A_label', '?p_label', '?B_label', '?r_label', '?C_label', 'Property']
-    : ['?A_label', '?p_label', '?B_label', '?C_label', 'Subclass', 'Human'];
+  const requiredColumns = useMemo(() => 
+    pattern === 'shortcut' 
+      ? ['?A_label', '?p_label', '?B_label', '?r_label', '?C_label', 'Property']
+      : ['?A_label', '?p_label', '?B_label', '?C_label', 'Subclass', 'Human'],
+    [pattern]
+  );
 
-  // Load preloaded data when pattern changes
-  useEffect(() => {
+  // Load preloaded data when pattern changes - use useCallback to prevent re-renders
+  const loadPreloadedData = useCallback(() => {
     if (pattern === 'shortcut') {
       setCsvData([...preloadedShortcutData]);
     } else if (pattern === 'subclass') {
@@ -31,14 +34,22 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern, onDataCha
     }
   }, [pattern]);
 
-  // Notify parent when data changes
   useEffect(() => {
-    if (onDataChange) {
-      onDataChange(csvData);
-    }
+    loadPreloadedData();
+  }, [loadPreloadedData]);
+
+  // Debounced data change notification to prevent excessive updates
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (onDataChange) {
+        onDataChange(csvData);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [csvData, onDataChange]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -66,14 +77,16 @@ export const FewShotEditor: React.FC<FewShotEditorProps> = ({ pattern, onDataCha
     
     // Reset the input value to allow uploading the same file again
     event.target.value = '';
-  };
+  }, [requiredColumns, pattern]);
 
-  const handleDataChange = (newData: any[]) => {
+  const handleDataChange = useCallback((newData: any[]) => {
     setCsvData(newData);
-  };
+  }, []);
 
-  const isPreloaded = (pattern === 'shortcut' && JSON.stringify(csvData) === JSON.stringify(preloadedShortcutData)) || 
-                     (pattern === 'subclass' && JSON.stringify(csvData) === JSON.stringify(preloadedSubclassData));
+  const isPreloaded = useMemo(() => {
+    return (pattern === 'shortcut' && JSON.stringify(csvData) === JSON.stringify(preloadedShortcutData)) || 
+           (pattern === 'subclass' && JSON.stringify(csvData) === JSON.stringify(preloadedSubclassData));
+  }, [pattern, csvData]);
 
   return (
     <Card className="border-amber-200 bg-amber-50/50">

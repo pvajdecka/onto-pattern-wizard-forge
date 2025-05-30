@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -25,17 +25,17 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newRowData, setNewRowData] = useState<any>({});
 
-  const startEdit = (index: number) => {
+  const startEdit = useCallback((index: number) => {
     setEditingRowIndex(index);
     setEditingData({ ...csvData[index] });
-  };
+  }, [csvData]);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setEditingRowIndex(null);
     setEditingData({});
-  };
+  }, []);
 
-  const saveEdit = () => {
+  const saveEdit = useCallback(() => {
     if (editingRowIndex !== null) {
       const newData = [...csvData];
       newData[editingRowIndex] = editingData;
@@ -47,32 +47,32 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
         description: "The few-shot example has been updated successfully.",
       });
     }
-  };
+  }, [editingRowIndex, csvData, editingData, onDataChange]);
 
-  const deleteRow = (index: number) => {
+  const deleteRow = useCallback((index: number) => {
     const newData = csvData.filter((_, i) => i !== index);
     onDataChange(newData);
     toast({
       title: "Row Deleted",
       description: "The few-shot example has been deleted successfully.",
     });
-  };
+  }, [csvData, onDataChange]);
 
-  const startAddNew = () => {
+  const startAddNew = useCallback(() => {
     setIsAddingNew(true);
     const emptyRow = requiredColumns.reduce((obj, col) => {
       obj[col] = '';
       return obj;
     }, {} as any);
     setNewRowData(emptyRow);
-  };
+  }, [requiredColumns]);
 
-  const cancelAddNew = () => {
+  const cancelAddNew = useCallback(() => {
     setIsAddingNew(false);
     setNewRowData({});
-  };
+  }, []);
 
-  const saveNewRow = () => {
+  const saveNewRow = useCallback(() => {
     // Check if all required fields are filled
     const hasEmptyFields = requiredColumns.some(col => !newRowData[col]?.trim());
     if (hasEmptyFields) {
@@ -92,7 +92,82 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
       title: "Row Added",
       description: "New few-shot example has been added successfully.",
     });
-  };
+  }, [requiredColumns, newRowData, csvData, onDataChange]);
+
+  const handleEditingDataChange = useCallback((col: string, value: string) => {
+    setEditingData(prev => ({
+      ...prev,
+      [col]: value
+    }));
+  }, []);
+
+  const handleNewRowDataChange = useCallback((col: string, value: string) => {
+    setNewRowData(prev => ({
+      ...prev,
+      [col]: value
+    }));
+  }, []);
+
+  // Memoize the table rows to prevent unnecessary re-renders
+  const tableRows = useMemo(() => {
+    return csvData.map((row, index) => (
+      <TableRow key={`${index}-${JSON.stringify(row)}`} className="border-amber-200 hover:bg-amber-50/50">
+        {requiredColumns.map(col => (
+          <TableCell key={col} className="text-gray-700 p-2">
+            {editingRowIndex === index ? (
+              <Input
+                value={editingData[col] || ''}
+                onChange={(e) => handleEditingDataChange(col, e.target.value)}
+                className="h-8 text-xs border-amber-300 focus:border-amber-500"
+              />
+            ) : (
+              <span className="text-xs">{row[col] || '-'}</span>
+            )}
+          </TableCell>
+        ))}
+        <TableCell className="p-2">
+          {editingRowIndex === index ? (
+            <div className="flex space-x-1">
+              <Button
+                onClick={saveEdit}
+                size="sm"
+                className="h-7 w-7 p-0 bg-green-600 hover:bg-green-700"
+              >
+                <Check className="h-3 w-3" />
+              </Button>
+              <Button
+                onClick={cancelEdit}
+                size="sm"
+                variant="outline"
+                className="h-7 w-7 p-0 border-gray-300"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex space-x-1">
+              <Button
+                onClick={() => startEdit(index)}
+                size="sm"
+                variant="outline"
+                className="h-7 w-7 p-0 border-amber-300 hover:bg-amber-50"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                onClick={() => deleteRow(index)}
+                size="sm"
+                variant="outline"
+                className="h-7 w-7 p-0 border-red-300 hover:bg-red-50 text-red-600"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </TableCell>
+      </TableRow>
+    ));
+  }, [csvData, requiredColumns, editingRowIndex, editingData, startEdit, deleteRow, saveEdit, cancelEdit, handleEditingDataChange]);
 
   if (csvData.length === 0 && !isAddingNew) {
     return (
@@ -137,66 +212,7 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {csvData.map((row, index) => (
-              <TableRow key={index} className="border-amber-200 hover:bg-amber-50/50">
-                {requiredColumns.map(col => (
-                  <TableCell key={col} className="text-gray-700 p-2">
-                    {editingRowIndex === index ? (
-                      <Input
-                        value={editingData[col] || ''}
-                        onChange={(e) => setEditingData({
-                          ...editingData,
-                          [col]: e.target.value
-                        })}
-                        className="h-8 text-xs border-amber-300 focus:border-amber-500"
-                      />
-                    ) : (
-                      <span className="text-xs">{row[col] || '-'}</span>
-                    )}
-                  </TableCell>
-                ))}
-                <TableCell className="p-2">
-                  {editingRowIndex === index ? (
-                    <div className="flex space-x-1">
-                      <Button
-                        onClick={saveEdit}
-                        size="sm"
-                        className="h-7 w-7 p-0 bg-green-600 hover:bg-green-700"
-                      >
-                        <Check className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        onClick={cancelEdit}
-                        size="sm"
-                        variant="outline"
-                        className="h-7 w-7 p-0 border-gray-300"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex space-x-1">
-                      <Button
-                        onClick={() => startEdit(index)}
-                        size="sm"
-                        variant="outline"
-                        className="h-7 w-7 p-0 border-amber-300 hover:bg-amber-50"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        onClick={() => deleteRow(index)}
-                        size="sm"
-                        variant="outline"
-                        className="h-7 w-7 p-0 border-red-300 hover:bg-red-50 text-red-600"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {tableRows}
             
             {isAddingNew && (
               <TableRow className="border-amber-200 bg-blue-50/50">
@@ -204,10 +220,7 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
                   <TableCell key={col} className="p-2">
                     <Input
                       value={newRowData[col] || ''}
-                      onChange={(e) => setNewRowData({
-                        ...newRowData,
-                        [col]: e.target.value
-                      })}
+                      onChange={(e) => handleNewRowDataChange(col, e.target.value)}
                       placeholder={`Enter ${col}`}
                       className="h-8 text-xs border-blue-300 focus:border-blue-500"
                     />
