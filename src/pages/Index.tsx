@@ -35,11 +35,11 @@ const Index = () => {
 
   // Pattern 1 state
   const [pattern1Data, setPattern1Data] = useState({
-    classA: 'corpus_part',
-    classB: 'Genre',
-    classC: 'Music Genre',
-    propertyP: 'genre',
-    propertyR: 'has sub-genre',
+    classA: 'Organization',
+    classB: 'Residence Object',
+    classC: 'BasicAddress',
+    propertyP: 'delivery location',
+    propertyR: 'addres',
     useFewShot: false,
     result: null,
     prompt: null,
@@ -90,11 +90,11 @@ const Index = () => {
     setActiveTab('pattern1');
     // Reset all data states
     setPattern1Data({
-      classA: 'corpus_part',
-      classB: 'Genre',
-      classC: 'Music Genre',
-      propertyP: 'genre',
-      propertyR: 'has sub-genre',
+      classA: 'Organization',
+      classB: 'Residence Object',
+      classC: 'BasicAddress',
+      propertyP: 'delivery location',
+      propertyR: 'addres',
       useFewShot: false,
       result: null,
       prompt: null,
