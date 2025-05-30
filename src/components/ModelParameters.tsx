@@ -41,23 +41,16 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Get backend URL based on current host
-  const getBackendUrl = () => {
-    const currentHost = window.location.hostname;
-    if (currentHost === 'patterns.vse.cz' || currentHost === 'www.patterns.vse.cz') {
-      return 'https://patterns.vse.cz:8500';
-    }
-    return 'http://localhost:8000';
-  };
+  // Use the specified backend URL
+  const BACKEND_URL = 'http://127.0.0.1:8000';
 
   // Fetch available models from backend
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const backendUrl = getBackendUrl();
-        console.log('Fetching models from:', backendUrl);
+        console.log('Fetching models from:', BACKEND_URL);
         
-        const response = await fetch(`${backendUrl}/model_provider_map`, {
+        const response = await fetch(`${BACKEND_URL}/model_provider_map`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -77,7 +70,6 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
           const availableModels = Object.keys(modelMap);
           if (availableModels.length > 0) {
             setModelName(availableModels[0]);
-            // Don't show error toast for old models, just silently update
             console.log(`Model "${initialParams.modelName}" not available. Using "${availableModels[0]}".`);
           }
         }
