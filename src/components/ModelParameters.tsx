@@ -31,11 +31,11 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   initialParams 
 }) => {
   const [modelName, setModelName] = useState(initialParams?.modelName || 'gpt-4o');
-  const [temperature, setTemperature] = useState([initialParams?.temperature || 0.0]);
-  const [topP, setTopP] = useState([initialParams?.topP || 1.0]);
-  const [frequencyPenalty, setFrequencyPenalty] = useState([initialParams?.frequencyPenalty || 0.0]);
-  const [presencePenalty, setPresencePenalty] = useState([initialParams?.presencePenalty || 0.0]);
-  const [repeatPenalty, setRepeatPenalty] = useState([initialParams?.repeatPenalty || 1.1]);
+  const [temperature, setTemperature] = useState([initialParams?.temperature ?? 0.0]);
+  const [topP, setTopP] = useState([initialParams?.topP ?? 1.0]);
+  const [frequencyPenalty, setFrequencyPenalty] = useState([initialParams?.frequencyPenalty ?? 0.0]);
+  const [presencePenalty, setPresencePenalty] = useState([initialParams?.presencePenalty ?? 0.0]);
+  const [repeatPenalty, setRepeatPenalty] = useState([initialParams?.repeatPenalty ?? 1.1]);
   
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
@@ -97,6 +97,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
         setTemperature([initialParams.temperature]);
       }
       if (initialParams.topP !== undefined && initialParams.topP !== topP[0]) {
+        console.log('Setting topP from initialParams:', initialParams.topP);
         setTopP([initialParams.topP]);
       }
       if (initialParams.frequencyPenalty !== undefined && initialParams.frequencyPenalty !== frequencyPenalty[0]) {
@@ -119,6 +120,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   }, []);
 
   const handleTopPChange = useCallback((value: number[]) => {
+    console.log('Top-p changed to:', value[0]);
     setTopP(value);
   }, []);
 
@@ -142,14 +144,16 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (onParametersChange) {
-        onParametersChange({
+        const params = {
           modelName,
           temperature: temperature[0],
           topP: topP[0],
           frequencyPenalty: frequencyPenalty[0],
           presencePenalty: presencePenalty[0],
           repeatPenalty: repeatPenalty[0]
-        });
+        };
+        console.log('Sending parameters to parent:', params);
+        onParametersChange(params);
       }
     }, 100);
 
@@ -234,7 +238,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
             onValueChange={handleTopPChange}
             max={1.0}
             min={0.0}
-            step={0.05}
+            step={0.01}
             className="w-full"
           />
         </div>
