@@ -26,6 +26,13 @@ interface ModelParametersProps {
   };
 }
 
+// Default fallback models that should always be available
+const DEFAULT_MODELS = {
+  'gpt-4o': 'openai',
+  'gpt-4o-mini': 'openai',
+  'gpt-3.5-turbo': 'openai',
+};
+
 export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({ 
   onParametersChange, 
   initialParams 
@@ -37,48 +44,81 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [presencePenalty, setPresencePenalty] = useState([initialParams?.presencePenalty ?? 0.0]);
   const [repeatPenalty, setRepeatPenalty] = useState([initialParams?.repeatPenalty ?? 1.1]);
   
-  const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
+  const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>(DEFAULT_MODELS);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
+  const [apiError, setApiError] = useState(false);
+
+  // Get API base URL - try to detect from current location or fall back to localhost
+  const getApiBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+      const currentHost = window.location.hostname;
+      if (currentHost === 'patterns.vse.cz' || currentHost === 'www.patterns.vse.cz') {
+        return 'https://patterns.vse.cz:8000';
+      }
+      // For local development, try to use the same host but different port
+      if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+        return `http://${currentHost}:8000`;
+      }
+    }
+    return 'http://localhost:8000';
+  };
 
   // Fetch available models from backend
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await fetch('http://localhost:8000/model_provider_map');
+        const apiBaseUrl = getApiBaseUrl();
+        console.log('Fetching models from:', `${apiBaseUrl}/model_provider_map`);
+        
+        const response = await fetch(`${apiBaseUrl}/model_provider_map`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (!response.ok) {
-          throw new Error(`Failed to fetch models: ${response.status}`);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
         const modelMap = await response.json();
         setModelProviderMap(modelMap);
+        setApiError(false);
         
-        // Check if initial model is available, if not show warning and use first available
+        // Check if initial model is available, if not use first available or fallback
         if (initialParams?.modelName && !modelMap[initialParams.modelName]) {
           const availableModels = Object.keys(modelMap);
           if (availableModels.length > 0) {
             setModelName(availableModels[0]);
-            toast({
-              title: "Model Not Available",
-              description: `Model "${initialParams.modelName}" is not currently available. Switched to "${availableModels[0]}".`,
-              variant: "destructive",
-            });
+            console.warn(`Model "${initialParams.modelName}" not available, switched to "${availableModels[0]}"`);
+          } else {
+            // If no models from API, use default
+            setModelName('gpt-4o');
+            console.warn(`No models available from API, using default: gpt-4o`);
           }
         }
       } catch (error) {
         console.error('Error fetching model provider map:', error);
-        toast({
-          title: "Failed to Load Models",
-          description: "Could not fetch available models from backend. Using default options.",
-          variant: "destructive",
-        });
-        // Fallback to hardcoded models if API fails
-        setModelProviderMap({
-          'gpt-4o': 'openai',
-          'gpt-4o-mini': 'openai',
-          'gpt-3.5-turbo': 'openai',
-          'llama3.1:8b': 'ollama',
-          'llama3.1:70b': 'ollama',
-          'mistral:7b': 'ollama',
-        });
+        setApiError(true);
+        
+        // Use fallback models and don't show error toast unless it's a critical issue
+        setModelProviderMap(DEFAULT_MODELS);
+        
+        // Only show toast for actual connectivity issues, not for expected local dev scenarios
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (!errorMessage.includes('fetch')) {
+          toast({
+            title: "Model API Warning",
+            description: "Using default model options. Backend API may be unavailable.",
+            variant: "default",
+          });
+        }
+        
+        // If initial model is not in defaults, use gpt-4o
+        if (initialParams?.modelName && !DEFAULT_MODELS[initialParams.modelName]) {
+          setModelName('gpt-4o');
+          console.warn(`Model "${initialParams.modelName}" not in defaults, using gpt-4o`);
+        }
       } finally {
         setIsLoadingModels(false);
       }
@@ -91,7 +131,12 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   useEffect(() => {
     if (initialParams) {
       if (initialParams.modelName && initialParams.modelName !== modelName) {
-        setModelName(initialParams.modelName);
+        // Validate the model exists in our available models
+        if (modelProviderMap[initialParams.modelName]) {
+          setModelName(initialParams.modelName);
+        } else {
+          console.warn(`Model "${initialParams.modelName}" not available, keeping current: ${modelName}`);
+        }
       }
       if (initialParams.temperature !== undefined && initialParams.temperature !== temperature[0]) {
         setTemperature([initialParams.temperature]);
@@ -110,7 +155,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
         setRepeatPenalty([initialParams.repeatPenalty]);
       }
     }
-  }, [initialParams]);
+  }, [initialParams, modelProviderMap]);
 
   const provider = modelProviderMap[modelName] || 'openai';
 
@@ -185,7 +230,14 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-gray-700">Model Selection</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-gray-700">Model Selection</Label>
+          {apiError && (
+            <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
+              Using defaults
+            </Badge>
+          )}
+        </div>
         <Select 
           value={modelName} 
           onValueChange={handleModelChange}
