@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       {/* Main content area */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md space-y-4 relative z-10">
-          {/* Logos above Welcome */}
+          {/* Logos above Welcome Back */}
           <div className="w-full pb-6">
             <div className="flex justify-center space-x-8 p-2">
               <img 
@@ -58,7 +59,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-700 to-green-700 bg-clip-text text-transparent">
-              Welcome
+              Welcome Back
             </h1>
             <p className="text-slate-600 text-lg">
               Sign in to access the Ontology Pattern Generator
