@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -190,6 +189,30 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             {session.model_name}
                           </Badge>
                           
+                          {/* Model Parameters Section */}
+                          <div className="ml-4 text-xs text-gray-600 space-y-1 border-l border-gray-200 pl-4">
+                            <div className="flex space-x-4">
+                              <div>
+                                <span className="font-medium">Temperature:</span>
+                                <span className="ml-1">{session.temperature}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium">Top-p:</span>
+                                <span className="ml-1">{session.top_p}</span>
+                              </div>
+                            </div>
+                            <div className="flex space-x-4">
+                              <div>
+                                <span className="font-medium">Frequency Penalty:</span>
+                                <span className="ml-1">{session.frequency_penalty}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium">Presence Penalty:</span>
+                                <span className="ml-1">{session.presence_penalty}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
                           {session.use_few_shot && (
                             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
                               few-shot
@@ -222,29 +245,6 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             {pattern === 'Shortcut' ? 'Class C:' : 'Class C (⊆ B):'}
                           </span>
                           <p className="text-gray-800">{session.C_label}</p>
-                        </div>
-                      </div>
-
-                      {/* Model Parameters Section - Improved formatting */}
-                      <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-                        <span className="font-medium text-gray-700 text-sm block mb-2">Model Parameters:</span>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Temperature:</span>
-                            <span className="font-mono text-gray-800">{session.temperature}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Top-p:</span>
-                            <span className="font-mono text-gray-800">{session.top_p}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Frequency Penalty:</span>
-                            <span className="font-mono text-gray-800">{session.frequency_penalty}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Presence Penalty:</span>
-                            <span className="font-mono text-gray-800">{session.presence_penalty}</span>
-                          </div>
                         </div>
                       </div>
 
