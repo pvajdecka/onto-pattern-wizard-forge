@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,18 +9,66 @@ import { Play, FileText, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { NetworkGraph3D } from '@/components/NetworkGraph3D';
 import { FewShotEditor } from '@/components/FewShotEditor';
+import { saveSessionData, getIsoTime } from '@/utils/sessionStorage';
 
-export const PatternOne = () => {
-  const [classA, setClassA] = useState('corpus_part');
-  const [classB, setClassB] = useState('Genre');
-  const [classC, setClassC] = useState('Music Genre');
-  const [propertyP, setPropertyP] = useState('genre');
-  const [propertyR, setPropertyR] = useState('has sub-genre');
-  const [useFewShot, setUseFewShot] = useState(false);
-  const [result, setResult] = useState(null);
-  const [prompt, setPrompt] = useState(null);
+interface PatternOneProps {
+  initialData?: {
+    classA: string;
+    classB: string;
+    classC: string;
+    propertyP: string;
+    propertyR: string;
+    useFewShot: boolean;
+    result: any;
+    prompt: any;
+    fewShotData: any[];
+  };
+  onDataChange?: (data: any) => void;
+}
+
+export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChange }) => {
+  const [classA, setClassA] = useState(initialData?.classA || 'corpus_part');
+  const [classB, setClassB] = useState(initialData?.classB || 'Genre');
+  const [classC, setClassC] = useState(initialData?.classC || 'Music Genre');
+  const [propertyP, setPropertyP] = useState(initialData?.propertyP || 'genre');
+  const [propertyR, setPropertyR] = useState(initialData?.propertyR || 'has sub-genre');
+  const [useFewShot, setUseFewShot] = useState(initialData?.useFewShot || false);
+  const [result, setResult] = useState(initialData?.result || null);
+  const [prompt, setPrompt] = useState(initialData?.prompt || null);
   const [isLoading, setIsLoading] = useState(false);
-  const [fewShotData, setFewShotData] = useState([]);
+  const [fewShotData, setFewShotData] = useState(initialData?.fewShotData || []);
+
+  // Update state when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setClassA(initialData.classA);
+      setClassB(initialData.classB);
+      setClassC(initialData.classC);
+      setPropertyP(initialData.propertyP);
+      setPropertyR(initialData.propertyR);
+      setUseFewShot(initialData.useFewShot);
+      setResult(initialData.result);
+      setPrompt(initialData.prompt);
+      setFewShotData(initialData.fewShotData);
+    }
+  }, [initialData]);
+
+  // Notify parent of changes
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        classA,
+        classB,
+        classC,
+        propertyP,
+        propertyR,
+        useFewShot,
+        result,
+        prompt,
+        fewShotData
+      });
+    }
+  }, [classA, classB, classC, propertyP, propertyR, useFewShot, result, prompt, fewShotData, onDataChange]);
 
   const buildPayload = () => {
     const basePayload = {
@@ -69,6 +118,15 @@ export const PatternOne = () => {
 
       const result = await response.json();
       setResult(result);
+      
+      // Save to session storage exactly like Streamlit app
+      const sessionData = {
+        time: getIsoTime(),
+        ...payload,
+        property_name: result.property_name,
+        explanation: result.explanation
+      };
+      saveSessionData(sessionData);
       
       toast({
         title: "Pattern Generated Successfully",

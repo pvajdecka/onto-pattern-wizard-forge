@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,17 +9,62 @@ import { Play, FileText, Layers } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { NetworkGraph3D } from '@/components/NetworkGraph3D';
 import { FewShotEditor } from '@/components/FewShotEditor';
+import { saveSessionData, getIsoTime } from '@/utils/sessionStorage';
 
-export const PatternTwo = () => {
-  const [classA, setClassA] = useState('System');
-  const [classB, setClassB] = useState('Component');
-  const [classC, setClassC] = useState('Storage Device');
-  const [propertyP, setPropertyP] = useState('has component');
-  const [useFewShot, setUseFewShot] = useState(false);
-  const [result, setResult] = useState(null);
-  const [prompt, setPrompt] = useState(null);
+interface PatternTwoProps {
+  initialData?: {
+    classA: string;
+    classB: string;
+    classC: string;
+    propertyP: string;
+    useFewShot: boolean;
+    result: any;
+    prompt: any;
+    fewShotData: any[];
+  };
+  onDataChange?: (data: any) => void;
+}
+
+export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChange }) => {
+  const [classA, setClassA] = useState(initialData?.classA || 'System');
+  const [classB, setClassB] = useState(initialData?.classB || 'Component');
+  const [classC, setClassC] = useState(initialData?.classC || 'Storage Device');
+  const [propertyP, setPropertyP] = useState(initialData?.propertyP || 'has component');
+  const [useFewShot, setUseFewShot] = useState(initialData?.useFewShot || false);
+  const [result, setResult] = useState(initialData?.result || null);
+  const [prompt, setPrompt] = useState(initialData?.prompt || null);
   const [isLoading, setIsLoading] = useState(false);
-  const [fewShotData, setFewShotData] = useState([]);
+  const [fewShotData, setFewShotData] = useState(initialData?.fewShotData || []);
+
+  // Update state when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setClassA(initialData.classA);
+      setClassB(initialData.classB);
+      setClassC(initialData.classC);
+      setPropertyP(initialData.propertyP);
+      setUseFewShot(initialData.useFewShot);
+      setResult(initialData.result);
+      setPrompt(initialData.prompt);
+      setFewShotData(initialData.fewShotData);
+    }
+  }, [initialData]);
+
+  // Notify parent of changes
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        classA,
+        classB,
+        classC,
+        propertyP,
+        useFewShot,
+        result,
+        prompt,
+        fewShotData
+      });
+    }
+  }, [classA, classB, classC, propertyP, useFewShot, result, prompt, fewShotData, onDataChange]);
 
   const buildPayload = () => {
     const basePayload = {
@@ -67,6 +113,15 @@ export const PatternTwo = () => {
 
       const result = await response.json();
       setResult(result);
+      
+      // Save to session storage exactly like Streamlit app
+      const sessionData = {
+        time: getIsoTime(),
+        ...payload,
+        class_name: result.class_name,
+        explanation: result.explanation
+      };
+      saveSessionData(sessionData);
       
       toast({
         title: "Subclass Generated Successfully",

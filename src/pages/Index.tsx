@@ -17,10 +17,37 @@ import { Documentation } from '@/components/Documentation';
 import { ModelParameters } from '@/components/ModelParameters';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { SessionData } from '@/utils/sessionStorage';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [activeTab, setActiveTab] = useState('pattern1');
+
+  // Pattern 1 state
+  const [pattern1Data, setPattern1Data] = useState({
+    classA: 'corpus_part',
+    classB: 'Genre',
+    classC: 'Music Genre',
+    propertyP: 'genre',
+    propertyR: 'has sub-genre',
+    useFewShot: false,
+    result: null,
+    prompt: null,
+    fewShotData: []
+  });
+
+  // Pattern 2 state
+  const [pattern2Data, setPattern2Data] = useState({
+    classA: 'System',
+    classB: 'Component',
+    classC: 'Storage Device',
+    propertyP: 'has component',
+    useFewShot: false,
+    result: null,
+    prompt: null,
+    fewShotData: []
+  });
 
   const handleLogin = (user: string) => {
     setIsLoggedIn(true);
@@ -29,6 +56,41 @@ const Index = () => {
       title: "Welcome!",
       description: `Successfully logged in as ${user}`,
     });
+  };
+
+  const handleLoadSession = (sessionData: SessionData, patternType: 'shortcut' | 'subclass') => {
+    if (patternType === 'shortcut') {
+      setPattern1Data({
+        classA: sessionData.A_label,
+        classB: sessionData.B_label,
+        classC: sessionData.C_label,
+        propertyP: sessionData.p_label,
+        propertyR: sessionData.r_label || 'has sub-genre',
+        useFewShot: sessionData.use_few_shot,
+        result: sessionData.property_name ? {
+          property_name: sessionData.property_name,
+          explanation: sessionData.explanation
+        } : null,
+        prompt: null,
+        fewShotData: sessionData.few_shot_examples || []
+      });
+      setActiveTab('pattern1');
+    } else {
+      setPattern2Data({
+        classA: sessionData.A_label,
+        classB: sessionData.B_label,
+        classC: sessionData.C_label,
+        propertyP: sessionData.p_label,
+        useFewShot: sessionData.use_few_shot,
+        result: sessionData.class_name ? {
+          class_name: sessionData.class_name,
+          explanation: sessionData.explanation
+        } : null,
+        prompt: null,
+        fewShotData: sessionData.few_shot_examples || []
+      });
+      setActiveTab('pattern2');
+    }
   };
 
   if (!isLoggedIn) {
@@ -55,7 +117,7 @@ const Index = () => {
             </div>
 
             {/* Main Content */}
-            <Tabs defaultValue="pattern1" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex justify-center mb-8">
                 <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-white/80 backdrop-blur-sm border border-green-200">
                   <TabsTrigger 
@@ -86,15 +148,21 @@ const Index = () => {
               </div>
 
               <TabsContent value="pattern1" className="mt-6">
-                <PatternOne />
+                <PatternOne 
+                  initialData={pattern1Data}
+                  onDataChange={setPattern1Data}
+                />
               </TabsContent>
 
               <TabsContent value="pattern2" className="mt-6">
-                <PatternTwo />
+                <PatternTwo 
+                  initialData={pattern2Data}
+                  onDataChange={setPattern2Data}
+                />
               </TabsContent>
 
               <TabsContent value="history" className="mt-6">
-                <SessionHistory />
+                <SessionHistory onLoadSession={handleLoadSession} />
               </TabsContent>
 
               <TabsContent value="docs" className="mt-6">
