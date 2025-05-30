@@ -73,9 +73,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, useFewShot, result, prompt, fewShotData, onDataChange]);
 
-  // Always use 127.0.0.1:8000 since backend and frontend are on the same server
+  // Use proxy endpoint instead of direct backend URL
   const getBackendUrl = () => {
-    return 'http://127.0.0.1:8000';
+    return '/api'; // This will be proxied to http://127.0.0.1:8000
   };
 
   const buildPayload = () => {
