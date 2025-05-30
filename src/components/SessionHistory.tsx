@@ -39,7 +39,7 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
       return;
     }
 
-    // Create CSV content matching the Streamlit format
+    // Create CSV content with all columns for both patterns
     const headers = [
       'pattern', 'A_label', 'p_label', 'B_label', 'r_label', 'C_label', 'result', 'timestamp',
       'model_name', 'use_few_shot', 'temperature', 'top_p', 'frequency_penalty', 
@@ -56,7 +56,7 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
           session.A_label,
           session.p_label,
           session.B_label,
-          session.r_label || '',
+          session.r_label || '', // Always include r_label column, empty for subclass
           session.C_label,
           result,
           session.time,
@@ -185,7 +185,7 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4 text-sm">
                         <div>
                           <span className="font-medium text-gray-600">Class A:</span>
                           <p className="text-gray-800">{session.A_label}</p>
@@ -198,10 +198,10 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                           <span className="font-medium text-gray-600">Class B:</span>
                           <p className="text-gray-800">{session.B_label}</p>
                         </div>
-                        {session.r_label && (
+                        {pattern === 'Shortcut' && (
                           <div>
                             <span className="font-medium text-gray-600">Property r:</span>
-                            <p className="text-gray-800">{session.r_label}</p>
+                            <p className="text-gray-800">{session.r_label || '-'}</p>
                           </div>
                         )}
                         <div>
