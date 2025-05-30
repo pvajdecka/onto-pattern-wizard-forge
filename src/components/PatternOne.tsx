@@ -34,11 +34,11 @@ interface PatternOneProps {
 }
 
 export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChange, modelParams }) => {
-  const [classA, setClassA] = useState(initialData?.classA || 'corpus_part');
-  const [classB, setClassB] = useState(initialData?.classB || 'Genre');
-  const [classC, setClassC] = useState(initialData?.classC || 'Music Genre');
-  const [propertyP, setPropertyP] = useState(initialData?.propertyP || 'genre');
-  const [propertyR, setPropertyR] = useState(initialData?.propertyR || 'has sub-genre');
+  const [classA, setClassA] = useState(initialData?.classA || 'Organization');
+  const [classB, setClassB] = useState(initialData?.classB || 'Residence Object');
+  const [classC, setClassC] = useState(initialData?.classC || 'BasicAddress');
+  const [propertyP, setPropertyP] = useState(initialData?.propertyP || 'delivery location');
+  const [propertyR, setPropertyR] = useState(initialData?.propertyR || 'addres');
   const [useFewShot, setUseFewShot] = useState(initialData?.useFewShot || false);
   const [result, setResult] = useState(initialData?.result || null);
   const [prompt, setPrompt] = useState(initialData?.prompt || null);
