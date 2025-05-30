@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -193,15 +194,15 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             )}
                           </div>
                           
-                          {/* Model Parameters Section - Single Line Layout */}
+                          {/* Model Parameters Section - Single Line Layout with Full Names */}
                           <div className="bg-gray-50 rounded-lg px-4 py-2 text-xs text-gray-700 border border-gray-200">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-3">
                               <span className="font-semibold text-gray-800">{session.model_name}</span>
                               <span className="text-gray-400">|</span>
-                              <span><span className="font-medium">T:</span> {session.temperature}</span>
-                              <span><span className="font-medium">P:</span> {session.top_p}</span>
-                              <span><span className="font-medium">FP:</span> {session.frequency_penalty}</span>
-                              <span><span className="font-medium">PP:</span> {session.presence_penalty}</span>
+                              <span><span className="font-medium">Temperature:</span> {session.temperature}</span>
+                              <span><span className="font-medium">Top-p:</span> {session.top_p}</span>
+                              <span><span className="font-medium">Frequency Penalty:</span> {session.frequency_penalty}</span>
+                              <span><span className="font-medium">Presence Penalty:</span> {session.presence_penalty}</span>
                             </div>
                           </div>
                         </div>
