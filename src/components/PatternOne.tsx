@@ -114,10 +114,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      const backendUrl = getBackendUrl();
-      console.log(`Calling ${backendUrl}/generate_shortcut with payload:`, payload);
+      console.log('Calling proxy endpoint /api/generate_shortcut with payload:', payload);
       
-      const response = await fetch(`${backendUrl}/generate_shortcut`, {
+      const response = await fetch('/api/generate_shortcut', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,10 +162,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      const backendUrl = getBackendUrl();
-      console.log(`Calling ${backendUrl}/shortcut_prompt with payload:`, payload);
+      console.log('Calling proxy endpoint /api/shortcut_prompt with payload:', payload);
       
-      const response = await fetch(`${backendUrl}/shortcut_prompt`, {
+      const response = await fetch('/api/shortcut_prompt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

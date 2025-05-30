@@ -109,10 +109,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      const backendUrl = getBackendUrl();
-      console.log(`Calling ${backendUrl}/generate_subclass with payload:`, payload);
+      console.log('Calling proxy endpoint /api/generate_subclass with payload:', payload);
       
-      const response = await fetch(`${backendUrl}/generate_subclass`, {
+      const response = await fetch('/api/generate_subclass', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,10 +157,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     
     try {
       const payload = buildPayload();
-      const backendUrl = getBackendUrl();
-      console.log(`Calling ${backendUrl}/subclass_prompt with payload:`, payload);
+      console.log('Calling proxy endpoint /api/subclass_prompt with payload:', payload);
       
-      const response = await fetch(`${backendUrl}/subclass_prompt`, {
+      const response = await fetch('/api/subclass_prompt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

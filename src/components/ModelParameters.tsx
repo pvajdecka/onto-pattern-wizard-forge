@@ -40,20 +40,13 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
   const [modelProviderMap, setModelProviderMap] = useState<{[key: string]: string}>({});
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Use proxy endpoint instead of direct backend URL
-  const getBackendUrl = () => {
-    return '/api'; // This will be proxied to http://127.0.0.1:8000
-  };
-
-  const BACKEND_URL = getBackendUrl();
-
-  // Fetch available models from backend
+  // Fetch available models from backend using proxy
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        console.log('Fetching models from:', BACKEND_URL);
+        console.log('Fetching models from proxy endpoint: /api/model_provider_map');
         
-        const response = await fetch(`${BACKEND_URL}/model_provider_map`, {
+        const response = await fetch('/api/model_provider_map', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -106,7 +99,7 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
     };
 
     fetchModels();
-  }, [initialParams?.modelName, BACKEND_URL]);
+  }, [initialParams?.modelName]);
 
   // Update state when initialParams change - but only once to avoid loops
   useEffect(() => {
