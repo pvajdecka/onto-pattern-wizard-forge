@@ -193,26 +193,15 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             )}
                           </div>
                           
-                          {/* Model Parameters Section - Vertical Layout */}
-                          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-700 border border-gray-200">
-                            <div className="font-semibold text-gray-800 mb-2">{session.model_name}</div>
-                            <div className="space-y-1">
-                              <div>
-                                <span className="font-medium">Temperature:</span>
-                                <span className="ml-1">{session.temperature}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium">Top-p:</span>
-                                <span className="ml-1">{session.top_p}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium">Frequency Penalty:</span>
-                                <span className="ml-1">{session.frequency_penalty}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium">Presence Penalty:</span>
-                                <span className="ml-1">{session.presence_penalty}</span>
-                              </div>
+                          {/* Model Parameters Section - Single Line Layout */}
+                          <div className="bg-gray-50 rounded-lg px-4 py-2 text-xs text-gray-700 border border-gray-200">
+                            <div className="flex items-center space-x-4">
+                              <span className="font-semibold text-gray-800">{session.model_name}</span>
+                              <span className="text-gray-400">|</span>
+                              <span><span className="font-medium">T:</span> {session.temperature}</span>
+                              <span><span className="font-medium">P:</span> {session.top_p}</span>
+                              <span><span className="font-medium">FP:</span> {session.frequency_penalty}</span>
+                              <span><span className="font-medium">PP:</span> {session.presence_penalty}</span>
                             </div>
                           </div>
                         </div>
