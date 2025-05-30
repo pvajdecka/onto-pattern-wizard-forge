@@ -24,6 +24,16 @@ const Index = () => {
   const [username, setUsername] = useState('');
   const [activeTab, setActiveTab] = useState('pattern1');
 
+  // Model parameters state
+  const [modelParams, setModelParams] = useState({
+    modelName: 'gpt-4o',
+    temperature: 0.0,
+    topP: 1.0,
+    frequencyPenalty: 0.0,
+    presencePenalty: 0.0,
+    repeatPenalty: 1.1
+  });
+
   // Pattern 1 state
   const [pattern1Data, setPattern1Data] = useState({
     classA: 'corpus_part',
@@ -58,7 +68,21 @@ const Index = () => {
     });
   };
 
+  const handleModelParametersChange = (params: typeof modelParams) => {
+    setModelParams(params);
+  };
+
   const handleLoadSession = (sessionData: SessionData, patternType: 'shortcut' | 'subclass') => {
+    // Load model parameters from session
+    setModelParams({
+      modelName: sessionData.model_name,
+      temperature: sessionData.temperature,
+      topP: sessionData.top_p,
+      frequencyPenalty: sessionData.frequency_penalty,
+      presencePenalty: sessionData.presence_penalty,
+      repeatPenalty: sessionData.repeat_penalty
+    });
+
     if (patternType === 'shortcut') {
       setPattern1Data({
         classA: sessionData.A_label,
@@ -100,7 +124,30 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-green-50 to-emerald-50">
-        <AppSidebar />
+        <div className="flex-shrink-0">
+          <div className="border-r border-gray-200 bg-white h-screen overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 bg-white">
+              <div className="space-y-4">
+                <img 
+                  src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
+                  alt="ONTO-DESIDE Logo" 
+                  className="w-full h-12 object-contain"
+                />
+                <img 
+                  src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
+                  alt="VSE Faculty Logo" 
+                  className="w-full h-12 object-contain"
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-white">
+              <div className="space-y-4">
+                <h3 className="text-slate-700 font-semibold text-sm">Model Configuration</h3>
+                <ModelParameters onParametersChange={handleModelParametersChange} />
+              </div>
+            </div>
+          </div>
+        </div>
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
@@ -151,6 +198,7 @@ const Index = () => {
                 <PatternOne 
                   initialData={pattern1Data}
                   onDataChange={setPattern1Data}
+                  modelParams={modelParams}
                 />
               </TabsContent>
 
@@ -158,6 +206,7 @@ const Index = () => {
                 <PatternTwo 
                   initialData={pattern2Data}
                   onDataChange={setPattern2Data}
+                  modelParams={modelParams}
                 />
               </TabsContent>
 
