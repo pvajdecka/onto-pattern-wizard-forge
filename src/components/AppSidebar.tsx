@@ -10,7 +10,19 @@ import {
 } from '@/components/ui/sidebar';
 import { ModelParameters } from '@/components/ModelParameters';
 
-export const AppSidebar = () => {
+interface AppSidebarProps {
+  modelParams?: {
+    modelName: string;
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    repeatPenalty: number;
+  };
+  onParametersChange?: (params: any) => void;
+}
+
+export const AppSidebar = ({ modelParams, onParametersChange }: AppSidebarProps) => {
   return (
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className="p-6 border-b border-gray-200 bg-white">
@@ -33,7 +45,10 @@ export const AppSidebar = () => {
             Model Configuration
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <ModelParameters />
+            <ModelParameters 
+              onParametersChange={onParametersChange}
+              initialParams={modelParams}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

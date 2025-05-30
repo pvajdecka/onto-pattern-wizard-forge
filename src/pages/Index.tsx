@@ -14,9 +14,8 @@ import { PatternOne } from '@/components/PatternOne';
 import { PatternTwo } from '@/components/PatternTwo';
 import { SessionHistory } from '@/components/SessionHistory';
 import { Documentation } from '@/components/Documentation';
-import { ModelParameters } from '@/components/ModelParameters';
 import { AppSidebar } from '@/components/AppSidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SessionData } from '@/utils/sessionStorage';
 
 const Index = () => {
@@ -125,105 +124,81 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-green-50 to-emerald-50">
-        <div className="flex-shrink-0">
-          <div className="border-r border-gray-200 bg-white h-screen overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 bg-white">
-              <div className="space-y-4">
-                <img 
-                  src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
-                  alt="ONTO-DESIDE Logo" 
-                  className="w-full h-12 object-contain"
-                />
-                <img 
-                  src="/lovable-uploads/6ae6085c-e6e5-405c-9e01-6fbe7331b9e4.png" 
-                  alt="VSE Faculty Logo" 
-                  className="w-full h-12 object-contain"
-                />
+        <AppSidebar />
+        <SidebarInset>
+          <main className="flex-1 p-6">
+            <div className="max-w-7xl mx-auto">
+              {/* Header */}
+              <div className="mb-8 text-center">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                  Ontology Pattern Generator
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  Advanced AI-powered ontology engineering platform
+                </p>
+                <div className="mt-4 text-sm text-green-600">
+                  Welcome back, <span className="font-semibold">{username}</span>
+                </div>
               </div>
+
+              {/* Main Content */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex justify-center mb-8">
+                  <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-white/80 backdrop-blur-sm border border-green-200">
+                    <TabsTrigger 
+                      value="pattern1" 
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Pattern 1: Shortcut
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="pattern2"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Pattern 2: Subclass
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="history"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Session History
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="docs"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Documentation
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="pattern1" className="mt-6">
+                  <PatternOne 
+                    initialData={pattern1Data}
+                    onDataChange={setPattern1Data}
+                    modelParams={modelParams}
+                  />
+                </TabsContent>
+
+                <TabsContent value="pattern2" className="mt-6">
+                  <PatternTwo 
+                    initialData={pattern2Data}
+                    onDataChange={setPattern2Data}
+                    modelParams={modelParams}
+                  />
+                </TabsContent>
+
+                <TabsContent value="history" className="mt-6">
+                  <SessionHistory onLoadSession={handleLoadSession} />
+                </TabsContent>
+
+                <TabsContent value="docs" className="mt-6">
+                  <Documentation />
+                </TabsContent>
+              </Tabs>
             </div>
-            <div className="p-4 bg-white">
-              <div className="space-y-4">
-                <h3 className="text-slate-700 font-semibold text-sm">Model Configuration</h3>
-                <ModelParameters 
-                  onParametersChange={handleModelParametersChange}
-                  initialParams={modelParams}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                Ontology Pattern Generator
-              </h1>
-              <p className="text-gray-600 text-lg">
-                Advanced AI-powered ontology engineering platform
-              </p>
-              <div className="mt-4 text-sm text-green-600">
-                Welcome back, <span className="font-semibold">{username}</span>
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex justify-center mb-8">
-                <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-white/80 backdrop-blur-sm border border-green-200">
-                  <TabsTrigger 
-                    value="pattern1" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    Pattern 1: Shortcut
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="pattern2"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    Pattern 2: Subclass
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="history"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    Session History
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="docs"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    Documentation
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="pattern1" className="mt-6">
-                <PatternOne 
-                  initialData={pattern1Data}
-                  onDataChange={setPattern1Data}
-                  modelParams={modelParams}
-                />
-              </TabsContent>
-
-              <TabsContent value="pattern2" className="mt-6">
-                <PatternTwo 
-                  initialData={pattern2Data}
-                  onDataChange={setPattern2Data}
-                  modelParams={modelParams}
-                />
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-6">
-                <SessionHistory onLoadSession={handleLoadSession} />
-              </TabsContent>
-
-              <TabsContent value="docs" className="mt-6">
-                <Documentation />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+          </main>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
