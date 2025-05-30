@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,9 +23,17 @@ interface PatternOneProps {
     fewShotData: any[];
   };
   onDataChange?: (data: any) => void;
+  modelParams?: {
+    modelName: string;
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    repeatPenalty: number;
+  };
 }
 
-export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChange }) => {
+export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChange, modelParams }) => {
   const [classA, setClassA] = useState(initialData?.classA || 'corpus_part');
   const [classB, setClassB] = useState(initialData?.classB || 'Genre');
   const [classC, setClassC] = useState(initialData?.classC || 'Music Genre');
@@ -77,7 +84,7 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
       B_label: classB,
       r_label: propertyR,
       C_label: classC,
-      model_name: "gpt-4o",
+      model_name: modelParams?.modelName || "gpt-4o",
       use_few_shot: useFewShot,
       few_shot_examples: useFewShot ? fewShotData.map(row => ({
         A_label: row.A_label || row['?A_label'] || '',
@@ -87,11 +94,11 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
         C_label: row.C_label || row['?C_label'] || '',
         Property: row.Property || ''
       })) : [],
-      temperature: 0.0,
-      top_p: 1.0,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      repeat_penalty: 1.1
+      temperature: modelParams?.temperature || 0.0,
+      top_p: modelParams?.topP || 1.0,
+      frequency_penalty: modelParams?.frequencyPenalty || 0.0,
+      presence_penalty: modelParams?.presencePenalty || 0.0,
+      repeat_penalty: modelParams?.repeatPenalty || 1.1
     };
     return basePayload;
   };

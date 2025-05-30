@@ -1,12 +1,23 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 
-export const ModelParameters = () => {
+interface ModelParametersProps {
+  onParametersChange?: (params: {
+    modelName: string;
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    repeatPenalty: number;
+  }) => void;
+}
+
+export const ModelParameters: React.FC<ModelParametersProps> = ({ onParametersChange }) => {
   const [modelName, setModelName] = useState('gpt-4o');
   const [temperature, setTemperature] = useState([0.0]);
   const [topP, setTopP] = useState([1.0]);
@@ -24,6 +35,20 @@ export const ModelParameters = () => {
   };
 
   const provider = modelProviderMap[modelName] || 'openai';
+
+  // Notify parent component when parameters change
+  useEffect(() => {
+    if (onParametersChange) {
+      onParametersChange({
+        modelName,
+        temperature: temperature[0],
+        topP: topP[0],
+        frequencyPenalty: frequencyPenalty[0],
+        presencePenalty: presencePenalty[0],
+        repeatPenalty: repeatPenalty[0]
+      });
+    }
+  }, [modelName, temperature, topP, frequencyPenalty, presencePenalty, repeatPenalty, onParametersChange]);
 
   return (
     <div className="space-y-6">

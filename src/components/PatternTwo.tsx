@@ -23,9 +23,17 @@ interface PatternTwoProps {
     fewShotData: any[];
   };
   onDataChange?: (data: any) => void;
+  modelParams?: {
+    modelName: string;
+    temperature: number;
+    topP: number;
+    frequencyPenalty: number;
+    presencePenalty: number;
+    repeatPenalty: number;
+  };
 }
 
-export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChange }) => {
+export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChange, modelParams }) => {
   const [classA, setClassA] = useState(initialData?.classA || 'System');
   const [classB, setClassB] = useState(initialData?.classB || 'Component');
   const [classC, setClassC] = useState(initialData?.classC || 'Storage Device');
@@ -72,7 +80,7 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
       p_label: propertyP,
       B_label: classB,
       C_label: classC,
-      model_name: "gpt-4o",
+      model_name: modelParams?.modelName || "gpt-4o",
       use_few_shot: useFewShot,
       few_shot_examples: useFewShot ? fewShotData.map(row => ({
         A_label: row.A_label || row['?A_label'] || '',
@@ -82,11 +90,11 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
         Subclass: row.Subclass || '',
         Human: row.Human || ''
       })) : [],
-      temperature: 0.0,
-      top_p: 1.0,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-      repeat_penalty: 1.1
+      temperature: modelParams?.temperature || 0.0,
+      top_p: modelParams?.topP || 1.0,
+      frequency_penalty: modelParams?.frequencyPenalty || 0.0,
+      presence_penalty: modelParams?.presencePenalty || 0.0,
+      repeat_penalty: modelParams?.repeatPenalty || 1.1
     };
     return basePayload;
   };
