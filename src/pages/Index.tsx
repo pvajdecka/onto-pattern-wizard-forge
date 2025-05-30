@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { LoginForm } from '@/components/LoginForm';
 import { PatternOne } from '@/components/PatternOne';
@@ -64,6 +65,46 @@ const Index = () => {
     toast({
       title: "Welcome!",
       description: `Successfully logged in as ${user}`,
+    });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername('');
+    setActiveTab('pattern1');
+    // Reset all data states
+    setPattern1Data({
+      classA: 'corpus_part',
+      classB: 'Genre',
+      classC: 'Music Genre',
+      propertyP: 'genre',
+      propertyR: 'has sub-genre',
+      useFewShot: false,
+      result: null,
+      prompt: null,
+      fewShotData: []
+    });
+    setPattern2Data({
+      classA: 'System',
+      classB: 'Component',
+      classC: 'Storage Device',
+      propertyP: 'has component',
+      useFewShot: false,
+      result: null,
+      prompt: null,
+      fewShotData: []
+    });
+    setModelParams({
+      modelName: 'gpt-4o',
+      temperature: 0.0,
+      topP: 1.0,
+      frequencyPenalty: 0.0,
+      presencePenalty: 0.0,
+      repeatPenalty: 1.1
+    });
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
     });
   };
 
@@ -129,7 +170,7 @@ const Index = () => {
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
               {/* Header */}
-              <div className="mb-8 text-center">
+              <div className="mb-8 text-center relative">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
                   Ontology Pattern Generator
                 </h1>
@@ -138,6 +179,19 @@ const Index = () => {
                 </p>
                 <div className="mt-4 text-sm text-green-600">
                   Welcome back, <span className="font-semibold">{username}</span>
+                </div>
+                
+                {/* Logout Button */}
+                <div className="absolute top-0 right-0">
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
                 </div>
               </div>
 
