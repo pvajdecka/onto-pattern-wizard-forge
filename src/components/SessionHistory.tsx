@@ -19,11 +19,26 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
 
   const loadSessions = () => {
     const sessionData = getSessionHistory();
-    // Sort by timestamp descending (newest first)
+    // Sort by timestamp descending (newest first) with improved date parsing
     const sortedSessions = sessionData.sort((a, b) => {
-      const timeA = new Date(a.time.replace(' at ', ' ')).getTime();
-      const timeB = new Date(b.time.replace(' at ', ' ')).getTime();
-      return timeB - timeA;
+      // Parse date format: "DD/MM/YYYY at HH:MM:SS"
+      const parseDate = (dateString: string) => {
+        const [datePart, timePart] = dateString.split(' at ');
+        const [day, month, year] = datePart.split('/');
+        const [hour, minute, second] = timePart.split(':');
+        return new Date(
+          parseInt(year),
+          parseInt(month) - 1, // months are 0-indexed
+          parseInt(day),
+          parseInt(hour),
+          parseInt(minute),
+          parseInt(second || '0')
+        ).getTime();
+      };
+      
+      const timeA = parseDate(a.time);
+      const timeB = parseDate(b.time);
+      return timeB - timeA; // newest first
     });
     setSessions(sortedSessions);
   };
