@@ -206,26 +206,8 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Input Section */}
+            {/* Input Section - Reordered */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Property p Label</Label>
-                <Input
-                  value={propertyP}
-                  onChange={(e) => setPropertyP(e.target.value)}
-                  className="border-green-200 focus:border-green-400"
-                  placeholder="Enter property p label"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Property r Label</Label>
-                <Input
-                  value={propertyR}
-                  onChange={(e) => setPropertyR(e.target.value)}
-                  className="border-green-200 focus:border-green-400"
-                  placeholder="Enter property r label"
-                />
-              </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Class A Label</Label>
                 <Input
@@ -236,12 +218,30 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
                 />
               </div>
               <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Property p Label</Label>
+                <Input
+                  value={propertyP}
+                  onChange={(e) => setPropertyP(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter property p label"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Class B Label</Label>
                 <Input
                   value={classB}
                   onChange={(e) => setClassB(e.target.value)}
                   className="border-green-200 focus:border-green-400"
                   placeholder="Enter class B label"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Property r Label</Label>
+                <Input
+                  value={propertyR}
+                  onChange={(e) => setPropertyR(e.target.value)}
+                  className="border-green-200 focus:border-green-400"
+                  placeholder="Enter property r label"
                 />
               </div>
               <div className="space-y-2">

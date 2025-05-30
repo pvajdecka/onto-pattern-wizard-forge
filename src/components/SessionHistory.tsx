@@ -170,12 +170,9 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                             <p className="text-sm text-gray-500">{session.time}</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 flex-wrap">
                           <Badge variant="secondary" className="bg-green-100 text-green-700">
                             {session.model_name}
-                          </Badge>
-                          <Badge variant="outline">
-                            temp: {session.temperature}
                           </Badge>
                           {session.use_few_shot && (
                             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
@@ -212,21 +209,44 @@ export const SessionHistory: React.FC<SessionHistoryProps> = ({ onLoadSession })
                         </div>
                       </div>
 
+                      {/* Model Parameters Section */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm bg-gray-50 p-3 rounded">
+                        <div>
+                          <span className="font-medium text-gray-600">Temperature:</span>
+                          <p className="text-gray-800">{session.temperature}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Top-p:</span>
+                          <p className="text-gray-800">{session.top_p}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Frequency Penalty:</span>
+                          <p className="text-gray-800">{session.frequency_penalty}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Presence Penalty:</span>
+                          <p className="text-gray-800">{session.presence_penalty}</p>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <span className="font-medium text-gray-600 text-sm">Few-shot enabled:</span>
+                        <p className="text-gray-700 text-sm mt-1">
+                          {session.use_few_shot ? 'Yes' : 'No'}
+                          {session.use_few_shot && session.few_shot_examples && session.few_shot_examples.length > 0 && (
+                            <span className="ml-2 text-gray-500">
+                              ({session.few_shot_examples.length} example{session.few_shot_examples.length !== 1 ? 's' : ''})
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
                       <div className="mb-4">
                         <span className="font-medium text-gray-600 text-sm">Explanation:</span>
                         <p className="text-gray-700 text-sm mt-1 leading-relaxed">
                           {session.explanation}
                         </p>
                       </div>
-
-                      {session.use_few_shot && session.few_shot_examples && session.few_shot_examples.length > 0 && (
-                        <div className="mb-4">
-                          <span className="font-medium text-gray-600 text-sm">Few-shot examples:</span>
-                          <p className="text-gray-600 text-xs mt-1">
-                            {session.few_shot_examples.length} example{session.few_shot_examples.length !== 1 ? 's' : ''} used
-                          </p>
-                        </div>
-                      )}
 
                       <Button
                         onClick={() => handleLoad(session)}
