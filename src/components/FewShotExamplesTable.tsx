@@ -14,7 +14,7 @@ interface FewShotExamplesTableProps {
   onDataChange: (newData: any[]) => void;
 }
 
-export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
+export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = React.memo(({
   csvData,
   requiredColumns,
   isPreloaded,
@@ -252,4 +252,6 @@ export const FewShotExamplesTable: React.FC<FewShotExamplesTableProps> = ({
       </ScrollArea>
     </div>
   );
-};
+});
+
+FewShotExamplesTable.displayName = 'FewShotExamplesTable';

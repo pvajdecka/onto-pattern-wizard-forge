@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,8 +64,8 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     setPrompt(null);
   }, [classA, classB, classC, propertyP]);
 
-  // Notify parent of changes
-  useEffect(() => {
+  // Notify parent of changes using useCallback to prevent re-renders
+  const notifyParentChange = useCallback(() => {
     if (onDataChange) {
       onDataChange({
         classA,
@@ -79,7 +80,12 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, useFewShot, result, prompt, fewShotData, onDataChange]);
 
-  const buildPayload = () => {
+  // Call parent notification when data changes
+  useEffect(() => {
+    notifyParentChange();
+  }, [notifyParentChange]);
+
+  const buildPayload = useCallback(() => {
     const basePayload = {
       A_label: classA,
       p_label: propertyP,
@@ -102,9 +108,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
       repeat_penalty: modelParams?.repeatPenalty || 1.1
     };
     return basePayload;
-  };
+  }, [classA, propertyP, classB, classC, modelParams, useFewShot, fewShotData]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     setIsLoading(true);
     setPrompt(null);
     
@@ -150,9 +156,9 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [buildPayload]);
 
-  const handleShowPrompt = async () => {
+  const handleShowPrompt = useCallback(async () => {
     setIsLoading(true);
     setResult(null);
     
@@ -184,13 +190,14 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [buildPayload]);
 
-  const handleFewShotDataChange = (newData) => {
+  const handleFewShotDataChange = useCallback((newData) => {
     setFewShotData(newData);
-  };
+  }, []);
 
-  const graphData = {
+  // Memoize graph data to prevent unnecessary re-renders
+  const graphData = React.useMemo(() => ({
     nodes: [
       { id: 'A', label: classA, color: '#10b981', x: -1, y: 0, z: 0 },
       { id: 'B', label: classB, color: '#059669', x: 1, y: 1, z: 0 },
@@ -202,7 +209,7 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
       { source: 'C', target: 'B', label: 'subclassOf', color: '#9ca3af', style: 'dashed' },
       ...(result ? [{ source: 'NEW', target: 'A', label: 'subclassOf', color: '#3b82f6', style: 'dashed', width: 3 }] : [])
     ]
-  };
+  }), [classA, classB, classC, propertyP, result]);
 
   return (
     <div className="space-y-8">
