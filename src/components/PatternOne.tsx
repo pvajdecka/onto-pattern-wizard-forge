@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,8 +66,8 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     setPrompt(null);
   }, [classA, classB, classC, propertyP, propertyR]);
 
-  // Notify parent of changes using useCallback to prevent re-renders
-  const notifyParentChange = useCallback(() => {
+  // Notify parent of changes
+  useEffect(() => {
     if (onDataChange) {
       onDataChange({
         classA,
@@ -84,12 +83,7 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     }
   }, [classA, classB, classC, propertyP, propertyR, useFewShot, result, prompt, fewShotData, onDataChange]);
 
-  // Call parent notification when data changes
-  useEffect(() => {
-    notifyParentChange();
-  }, [notifyParentChange]);
-
-  const buildPayload = useCallback(() => {
+  const buildPayload = () => {
     const basePayload = {
       A_label: classA,
       p_label: propertyP,
@@ -113,9 +107,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
       repeat_penalty: modelParams?.repeatPenalty || 1.1
     };
     return basePayload;
-  }, [classA, propertyP, classB, propertyR, classC, modelParams, useFewShot, fewShotData]);
+  };
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = async () => {
     setIsLoading(true);
     setPrompt(null);
     
@@ -161,9 +155,9 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     } finally {
       setIsLoading(false);
     }
-  }, [buildPayload]);
+  };
 
-  const handleShowPrompt = useCallback(async () => {
+  const handleShowPrompt = async () => {
     setIsLoading(true);
     setResult(null);
     
@@ -195,14 +189,13 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
     } finally {
       setIsLoading(false);
     }
-  }, [buildPayload]);
+  };
 
-  const handleFewShotDataChange = useCallback((newData) => {
+  const handleFewShotDataChange = (newData) => {
     setFewShotData(newData);
-  }, []);
+  };
 
-  // Memoize graph data to prevent unnecessary re-renders
-  const graphData = React.useMemo(() => ({
+  const graphData = {
     nodes: [
       { id: 'A', label: classA, color: '#10b981', x: -2, y: 1, z: 0 },
       { id: 'B', label: classB, color: '#059669', x: 0, y: 0, z: 0 },
@@ -213,7 +206,7 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
       { source: 'B', target: 'C', label: propertyR, color: '#6b7280' },
       ...(result ? [{ source: 'A', target: 'C', label: result.property_name, color: '#3b82f6', width: 3 }] : [])
     ]
-  }), [classA, classB, classC, propertyP, propertyR, result]);
+  };
 
   return (
     <div className="space-y-8">
