@@ -6,13 +6,8 @@ const getBackendUrl = () => {
     return 'http://localhost:8000';
   }
   
-  // Production - use HTTPS with same domain
-  if (window.location.protocol === 'https:') {
-    return `https://${window.location.hostname}:8000`;
-  }
-  
-  // Fallback to relative URLs for same-server deployment
-  return '';
+  // Production - use nginx proxy with /api prefix
+  return '/api';
 };
 
 export const API_CONFIG = {
