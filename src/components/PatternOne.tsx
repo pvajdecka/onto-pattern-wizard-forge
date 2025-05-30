@@ -45,18 +45,18 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
   const [isLoading, setIsLoading] = useState(false);
   const [fewShotData, setFewShotData] = useState(initialData?.fewShotData || []);
 
-  // Update state when initialData changes
+  // Update state when initialData changes - but only if initialData actually has values
   useEffect(() => {
-    if (initialData) {
-      setClassA(initialData.classA);
-      setClassB(initialData.classB);
-      setClassC(initialData.classC);
-      setPropertyP(initialData.propertyP);
-      setPropertyR(initialData.propertyR);
-      setUseFewShot(initialData.useFewShot);
-      setResult(initialData.result);
-      setPrompt(initialData.prompt);
-      setFewShotData(initialData.fewShotData);
+    if (initialData && Object.keys(initialData).length > 0) {
+      if (initialData.classA) setClassA(initialData.classA);
+      if (initialData.classB) setClassB(initialData.classB);
+      if (initialData.classC) setClassC(initialData.classC);
+      if (initialData.propertyP) setPropertyP(initialData.propertyP);
+      if (initialData.propertyR) setPropertyR(initialData.propertyR);
+      if (initialData.useFewShot !== undefined) setUseFewShot(initialData.useFewShot);
+      if (initialData.result) setResult(initialData.result);
+      if (initialData.prompt) setPrompt(initialData.prompt);
+      if (initialData.fewShotData) setFewShotData(initialData.fewShotData);
     }
   }, [initialData]);
 
