@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,12 +57,6 @@ export const PatternTwo: React.FC<PatternTwoProps> = ({ initialData, onDataChang
       setFewShotData(initialData.fewShotData);
     }
   }, [initialData]);
-
-  // Reset results when any input field changes
-  useEffect(() => {
-    setResult(null);
-    setPrompt(null);
-  }, [classA, classB, classC, propertyP]);
 
   // Notify parent of changes
   useEffect(() => {
