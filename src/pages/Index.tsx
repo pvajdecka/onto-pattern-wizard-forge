@@ -74,14 +74,15 @@ const Index = () => {
 
   const handleLoadSession = (sessionData: SessionData, patternType: 'shortcut' | 'subclass') => {
     // Load model parameters from session
-    setModelParams({
+    const newModelParams = {
       modelName: sessionData.model_name,
       temperature: sessionData.temperature,
       topP: sessionData.top_p,
       frequencyPenalty: sessionData.frequency_penalty,
       presencePenalty: sessionData.presence_penalty,
       repeatPenalty: sessionData.repeat_penalty
-    });
+    };
+    setModelParams(newModelParams);
 
     if (patternType === 'shortcut') {
       setPattern1Data({
@@ -143,7 +144,10 @@ const Index = () => {
             <div className="p-4 bg-white">
               <div className="space-y-4">
                 <h3 className="text-slate-700 font-semibold text-sm">Model Configuration</h3>
-                <ModelParameters onParametersChange={handleModelParametersChange} />
+                <ModelParameters 
+                  onParametersChange={handleModelParametersChange}
+                  initialParams={modelParams}
+                />
               </div>
             </div>
           </div>
