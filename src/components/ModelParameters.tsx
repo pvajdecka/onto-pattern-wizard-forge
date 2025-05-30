@@ -42,10 +42,13 @@ export const ModelParameters: React.FC<ModelParametersProps> = React.memo(({
 
   // Get the actual server hostname from environment or use the current hostname with port 8000
   const getBackendUrl = () => {
-    // If we're on localhost, use localhost:8000
-    // Otherwise, use the current hostname with port 8000
     const hostname = window.location.hostname;
-    return `http://${hostname}:8000`;
+    // If hostname is localhost or 127.0.0.1, use 127.0.0.1 for consistency
+    // Otherwise use the actual hostname (for remote access)
+    const backendHost = (hostname === 'localhost' || hostname === '127.0.0.1') 
+      ? '127.0.0.1' 
+      : hostname;
+    return `http://${backendHost}:8000`;
   };
 
   const BACKEND_URL = getBackendUrl();
