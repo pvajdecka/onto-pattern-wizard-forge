@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,6 +58,23 @@ const Index = () => {
     fewShotData: []
   });
 
+  // Valid model names - update this list as needed
+  const validModels = ['gpt-4o', 'gpt-4o-mini', 'gpt-4.5-preview'];
+
+  const validateModelName = (modelName: string): string => {
+    if (validModels.includes(modelName)) {
+      return modelName;
+    }
+    
+    toast({
+      title: "Invalid Model Detected",
+      description: `The model "${modelName}" from session history is no longer available. Defaulting to gpt-4o.`,
+      variant: "destructive",
+    });
+    
+    return 'gpt-4o'; // Default fallback model
+  };
+
   const handleLogin = (user: string) => {
     setIsLoggedIn(true);
     setUsername(user);
@@ -114,9 +130,12 @@ const Index = () => {
   };
 
   const handleLoadSession = (sessionData: SessionData, patternType: 'shortcut' | 'subclass') => {
-    // Load model parameters from session
+    // Validate and potentially correct the model name
+    const validatedModelName = validateModelName(sessionData.model_name);
+    
+    // Load model parameters from session with validated model name
     const newModelParams = {
-      modelName: sessionData.model_name,
+      modelName: validatedModelName,
       temperature: sessionData.temperature,
       topP: sessionData.top_p,
       frequencyPenalty: sessionData.frequency_penalty,
@@ -156,6 +175,19 @@ const Index = () => {
         fewShotData: sessionData.few_shot_examples || []
       });
       setActiveTab('pattern2');
+    }
+
+    // Show success toast only if model was valid
+    if (validatedModelName === sessionData.model_name) {
+      toast({
+        title: "Session Loaded",
+        description: `Loaded ${patternType} pattern configuration successfully.`,
+      });
+    } else {
+      toast({
+        title: "Session Loaded with Model Update",
+        description: `Loaded ${patternType} pattern but updated model to ${validatedModelName}.`,
+      });
     }
   };
 
