@@ -40,9 +40,9 @@ export const PatternOne = () => {
     
     try {
       const payload = buildPayload();
-      console.log('Calling /generate_shortcut with payload:', payload);
+      console.log('Calling http://localhost:8000/generate_shortcut with payload:', payload);
       
-      const response = await fetch('/generate_shortcut', {
+      const response = await fetch('http://localhost:8000/generate_shortcut', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,9 +79,9 @@ export const PatternOne = () => {
     
     try {
       const payload = buildPayload();
-      console.log('Calling /shortcut_prompt with payload:', payload);
+      console.log('Calling http://localhost:8000/shortcut_prompt with payload:', payload);
       
-      const response = await fetch('/shortcut_prompt', {
+      const response = await fetch('http://localhost:8000/shortcut_prompt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

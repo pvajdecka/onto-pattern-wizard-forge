@@ -38,9 +38,9 @@ export const PatternTwo = () => {
     
     try {
       const payload = buildPayload();
-      console.log('Calling /generate_subclass with payload:', payload);
+      console.log('Calling http://localhost:8000/generate_subclass with payload:', payload);
       
-      const response = await fetch('/generate_subclass', {
+      const response = await fetch('http://localhost:8000/generate_subclass', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,9 +77,9 @@ export const PatternTwo = () => {
     
     try {
       const payload = buildPayload();
-      console.log('Calling /subclass_prompt with payload:', payload);
+      console.log('Calling http://localhost:8000/subclass_prompt with payload:', payload);
       
-      const response = await fetch('/subclass_prompt', {
+      const response = await fetch('http://localhost:8000/subclass_prompt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
