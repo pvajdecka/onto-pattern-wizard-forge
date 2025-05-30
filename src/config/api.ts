@@ -1,5 +1,5 @@
 
 // Centralized API configuration
 export const API_CONFIG = {
-  BACKEND_URL: ''  // Empty string for relative URLs on same server
+  BACKEND_URL: `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:8501`
 };
