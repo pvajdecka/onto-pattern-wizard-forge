@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Play, FileText, Sparkles } from 'lucide-react';
+import { Play, FileText, Sparkles, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { NetworkGraph3D } from '@/components/NetworkGraph3D';
 import { FewShotEditor } from '@/components/FewShotEditor';
 import { saveSessionData, getIsoTime } from '@/utils/sessionStorage';
@@ -44,6 +45,8 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
   const [prompt, setPrompt] = useState(initialData?.prompt || null);
   const [isLoading, setIsLoading] = useState(false);
   const [fewShotData, setFewShotData] = useState(initialData?.fewShotData || []);
+  const [showTemperatureWarning, setShowTemperatureWarning] = useState(false);
+  const [attemptedWithCorrectTemp, setAttemptedWithCorrectTemp] = useState(false);
 
   // Update state when initialData changes - but only if initialData actually has values
   useEffect(() => {
@@ -111,6 +114,7 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
   const handleGenerate = async () => {
     setIsLoading(true);
     setPrompt(null);
+    setShowTemperatureWarning(false);
     
     try {
       const payload = buildPayload();
@@ -124,12 +128,29 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
         body: JSON.stringify(payload),
       });
 
+      if (response.status === 500) {
+        if (modelParams?.temperature !== 1.0 && !attemptedWithCorrectTemp) {
+          setShowTemperatureWarning(true);
+          setAttemptedWithCorrectTemp(true);
+          toast({
+            title: "Model Configuration Issue",
+            description: "Some models require temperature to be set to 1.0. Please adjust the temperature in the sidebar.",
+            variant: "destructive",
+          });
+          return;
+        } else {
+          throw new Error("Backend server error. Please try again later or contact support if the issue persists.");
+        }
+      }
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       setResult(result);
+      setShowTemperatureWarning(false);
+      setAttemptedWithCorrectTemp(false);
       
       // Save to session storage exactly like Streamlit app
       const sessionData = {
@@ -159,6 +180,7 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
   const handleShowPrompt = async () => {
     setIsLoading(true);
     setResult(null);
+    setShowTemperatureWarning(false);
     
     try {
       const payload = buildPayload();
@@ -172,12 +194,29 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
         body: JSON.stringify(payload),
       });
 
+      if (response.status === 500) {
+        if (modelParams?.temperature !== 1.0 && !attemptedWithCorrectTemp) {
+          setShowTemperatureWarning(true);
+          setAttemptedWithCorrectTemp(true);
+          toast({
+            title: "Model Configuration Issue",
+            description: "Some models require temperature to be set to 1.0. Please adjust the temperature in the sidebar.",
+            variant: "destructive",
+          });
+          return;
+        } else {
+          throw new Error("Backend server error. Please try again later or contact support if the issue persists.");
+        }
+      }
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       setPrompt(result.prompt);
+      setShowTemperatureWarning(false);
+      setAttemptedWithCorrectTemp(false);
     } catch (error) {
       console.error('Show prompt error:', error);
       toast({
@@ -209,6 +248,24 @@ export const PatternOne: React.FC<PatternOneProps> = ({ initialData, onDataChang
 
   return (
     <div className="space-y-8">
+      {/* Temperature Warning Alert */}
+      {showTemperatureWarning && (
+        <Alert className="border-orange-200 bg-orange-50/50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            <div className="space-y-2">
+              <p className="font-semibold">Model Configuration Issue</p>
+              <p>Some models require the temperature to be set to 1.0. Please:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Open the sidebar (Model Parameters)</li>
+                <li>Set Temperature to 1.0</li>
+                <li>Try running the generation again</li>
+              </ol>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card className="shadow-lg border-green-200 bg-white/80 backdrop-blur-sm">
         <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
           <CardTitle className="flex items-center space-x-2 text-xl">
