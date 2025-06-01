@@ -42,7 +42,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <div className="w-full max-w-md space-y-4 relative z-10">
           {/* Logos above Welcome */}
           <div className="w-full pb-6">
-            <div className="flex justify-center items-center space-x-6 p-2">
+            <div className="flex md:flex-row flex-col justify-center items-center md:space-x-6 md:space-y-0 space-y-4 p-2">
               <img 
                 src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
                 alt="ONTO-DESIDE Logo" 
