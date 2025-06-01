@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,10 +42,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <div className="w-full max-w-md space-y-4 relative z-10">
           {/* Logos above Welcome */}
           <div className="w-full pb-6">
-            <div className="flex justify-center space-x-8 p-2">
+            <div className="flex justify-center items-center space-x-6 p-2">
               <img 
                 src="/lovable-uploads/13622cbc-bd03-4bdc-a031-240546ddc6d7.png" 
                 alt="ONTO-DESIDE Logo" 
+                className="h-20 object-contain opacity-80"
+              />
+              <img 
+                src="/lovable-uploads/7182a64a-010a-47d2-8920-087a34127cb6.png" 
+                alt="ESWC25 Logo" 
                 className="h-20 object-contain opacity-80"
               />
               <img 
