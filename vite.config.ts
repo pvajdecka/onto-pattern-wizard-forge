@@ -8,7 +8,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8501,
     // PROXY SETTINGS:
     proxy: {
       // Any request that starts with "/api" will get forwarded to FastAPI:
