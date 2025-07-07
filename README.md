@@ -207,4 +207,5 @@ If you get stuck, run `npm run doctor` (community script) to analyse common envi
 
 ## License
 
-This project is released under the **MIT License**.  Third‑party dependencies each retain their respective licenses (see `/node_modules/**/LICENSE*`).
+MIT — see **LICENSE**.
+
